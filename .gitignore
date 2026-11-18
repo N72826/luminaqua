@@ -1,0 +1,12 @@
+# Personal files (backups, keys, one-off scripts) - never published
+private/
+
+# Runtime state written by the app on the Pi
+luminaqua/state.json
+luminaqua/state.json.*
+luminaqua/state.tmp
+
+# Python
+.venv/
+__pycache__/
+*.pyc

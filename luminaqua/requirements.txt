@@ -1,0 +1,5 @@
+# For Raspberry Pi OS Bookworm/Trixie (Python 3.11+). The code uses the pydantic 1.x API.
+fastapi==0.103.2
+pydantic==1.10.21
+uvicorn==0.32.1
+bleak==0.22.3

@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1a24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LuminAqua">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>LuminAqua</title>
+<style>
+:root{
+  --bg:#0b1a24;--card:#12263a;--card2:#183149;--line:#24425e;--text:#e6f1f8;--dim:#8aa6bb;
+  --accent:#3fc1c9;--accent2:#2a8f96;--danger:#e0605e;--ok:#5ccf86;--warn:#f0b54a;
+  --r:#ff5d5d;--g:#55d68a;--b:#4aa8ff;--uv:#b26cff;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px calc(32px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+h1{font-size:22px;margin:0;letter-spacing:.3px}
+h1 span{color:var(--accent)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;font-weight:600}
+h3{font-size:12px;color:var(--dim);margin:16px 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.status{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.status .big{font-size:18px;font-weight:650}
+.status .sub{color:var(--dim);font-size:13px}
+.status .bulb{width:14px;height:14px;border-radius:50%;flex:none;background:#2b3f52}
+.status .bulb.on{background:var(--warn);box-shadow:0 0 12px var(--warn)}
+.status .bulb.ov{background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.hint{text-transform:none;letter-spacing:0;font-weight:400}
+.for{color:var(--accent);text-transform:none;letter-spacing:0;font-weight:600}
+.warn{color:var(--warn)!important}
+.lights{display:flex;gap:10px;flex-wrap:wrap}
+.light{flex:1 1 220px;display:flex;align-items:flex-start;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;user-select:none;cursor:pointer;position:relative}
+.light.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#17405a}
+.light .check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:14px;color:#062027;margin-top:1px}
+.light.sel .check{background:var(--accent);border-color:var(--accent)}
+.light .nm{font-weight:650;display:flex;align-items:center;gap:8px}
+.light .st{font-size:14px;margin-top:2px}
+.light .sub{font-size:12px;color:var(--dim);margin-top:2px}
+.light .bulb{width:10px;height:10px;border-radius:50%;background:#2b3f52;flex:none}
+.light .bulb.on{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.light .bulb.ov{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.light .back{margin-top:8px;min-height:32px;padding:4px 10px;font-size:13px}
+.timer{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}
+@media (max-width:560px){.timer{grid-template-columns:1fr}.ring{margin:0 auto}}
+.ring{width:200px;height:200px}
+.times{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center}
+.times label{color:var(--dim);font-size:13px}
+input[type=time]{background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;font-size:17px;width:100%;color-scheme:dark}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:36px;padding:6px 12px}
+.seg button.sel{background:var(--accent2);border-color:var(--accent)}
+.slider{display:grid;grid-template-columns:44px 1fr 48px;align-items:center;gap:10px;margin:8px 0}
+.slider label{font-weight:700;font-size:13px}
+.slider output{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#1d3550,var(--c,var(--accent)))}
+input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#1d3550,var(--c,var(--accent)))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;margin-top:-8px;border:3px solid var(--c,var(--accent))}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--c,var(--accent))}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer;min-height:42px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent2);border-color:var(--accent)}
+button.danger{border-color:var(--danger);color:#ffd5d4}
+button:disabled{opacity:.5;cursor:wait}
+.grow{flex:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--card2);border:1px solid var(--line);cursor:pointer;user-select:none}
+.chip.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#17405a}
+.chip .sw{display:flex;gap:2px}.chip .sw i{width:6px;height:14px;border-radius:2px;display:block}
+.chip .x{color:var(--dim);margin-left:2px;padding:0 2px}
+.chip .x:hover{color:var(--danger)}
+.dirty{color:var(--warn);font-size:13px;display:none}
+.dirty.show{display:inline}
+details summary{cursor:pointer;color:var(--dim);font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.timeline{position:relative;height:44px;border-radius:10px;background:#0e2131;border:1px solid var(--line);overflow:hidden;margin:12px 0}
+.timeline .s{position:absolute;top:0;bottom:0;border-right:1px solid #0b1a24}
+table{width:100%;border-collapse:collapse}
+td{padding:4px 3px;vertical-align:middle}
+td input{width:100%;background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 6px;font:inherit;min-width:0}
+td input[type=number]{text-align:center}
+/* iOS Safari gives time inputs a fixed intrinsic width that ignores width:100%; drop the native look so they fit */
+input[type=time],input[type=number]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;box-sizing:border-box;display:block;margin:0}
+input[type=time]::-webkit-date-and-time-value{text-align:center;margin:0}
+input[type=time]{min-height:42px;text-align:center}
+.times>*{min-width:0}
+.timeline{margin-bottom:4px}
+.timeline .gl{position:absolute;top:0;bottom:0;width:1px;background:#1d3550;pointer-events:none}
+.timeline .s{z-index:1}
+.timeline .now{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.6;z-index:2;pointer-events:none}
+.tlaxis{position:relative;height:16px;margin:0 0 10px;font-size:11px;color:var(--dim)}
+.tlaxis span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.tlaxis span:first-child{transform:none}.tlaxis span:last-child{transform:translateX(-100%)}
+.period{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.prow{display:grid;grid-template-columns:1fr 1fr 44px;gap:8px;align-items:end}
+.prow.ch{grid-template-columns:repeat(4,1fr);margin-top:8px}
+.prow label{display:block;font-size:11px;font-weight:700;color:var(--dim);min-width:0}
+.prow label input{margin-top:3px;width:100%;background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 4px;font:inherit;font-size:16px;text-align:center}
+.prow .del{min-height:42px;padding:4px 0}
+.prow label input[type=time]{font-size:15px;padding:8px 2px}
+@media (max-width:560px){input[type=time]::-webkit-calendar-picker-indicator{display:none}}
+table.pts{table-layout:fixed}
+table.pts td{padding:4px 3px}
+th{font-size:11px;color:var(--dim);font-weight:600;text-align:center;padding:0 3px 4px}
+.note{font-size:12px;color:var(--dim);margin:10px 0 0}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border-bottom:1px solid var(--line);margin:0 0 14px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 4px;min-height:44px;min-width:0;color:var(--dim);font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;line-height:1.2}
+.tabs .short{display:none}
+@media (max-width:560px){.tabs .long{display:none}.tabs .short{display:inline}.tabs button{font-size:14px}}
+.tabs button:hover{color:var(--text)}
+.tabs button.sel{color:var(--text);border-bottom-color:var(--accent)}
+.badge:empty{display:none}
+.badge{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:10px;letter-spacing:.6px;text-transform:uppercase;background:rgba(92,207,134,.16);color:var(--ok);border:1px solid rgba(92,207,134,.5);border-radius:999px;padding:1px 7px;font-weight:700}
+.ow{color:var(--warn);font-size:13px;margin:12px 0 0;display:none;background:rgba(240,181,74,.08);border:1px solid rgba(240,181,74,.35);border-radius:10px;padding:8px 10px}
+.check{cursor:pointer}
+.light .tools{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.light .tools button{min-height:30px;padding:2px 8px;font-size:13px;background:transparent;border-color:transparent;color:var(--dim)}
+.light .tools button:hover{border-color:var(--line);color:var(--text)}
+.light .nm{padding-right:70px}
+.emptybox{text-align:center;padding:18px 10px}
+.scanrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.scanrow .meta{flex:1;min-width:0}.scanrow .meta div{font-size:12px;color:var(--dim)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:999px;padding:1px 7px;border:1px solid}
+.tag.ok{color:var(--ok);border-color:rgba(92,207,134,.5)}.tag.maybe{color:var(--warn);border-color:rgba(240,181,74,.5)}
+input.txt{background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;min-width:0}
+body.nolights main>section.card:not(#lightsCard){display:none}
+.home{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+h1 span.wm{color:inherit}
+.logo{width:34px;height:34px;border-radius:9px;box-shadow:0 0 0 1px var(--line)}
+.hright{display:flex;align-items:center;gap:12px}
+.hlink{color:var(--accent);text-decoration:none;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px}
+.hlink:hover{border-color:var(--accent)}
+#backLink,main>section.card#about{display:none}
+body.showabout main>section.card{display:none}
+body.showabout main>section.card#about{display:block}
+body.showabout #backLink{display:inline-block}
+body.showabout #aboutLink{display:none}
+#about p{margin:0 0 10px;line-height:1.55}
+#about .lead{font-size:16px}
+#about .perks{margin:4px 0 14px;padding-left:20px;line-height:1.55}
+#about .perks li{margin-bottom:6px}
+#about .row{margin:4px 0 0}
+a.btn{display:inline-block;text-decoration:none;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-weight:600}
+a.btn.primary{background:var(--accent2);border-color:var(--accent);color:#fff}
+a.btn:hover{border-color:var(--accent)}
+.donate{margin-top:18px;padding:14px;border-radius:12px;border:1px solid rgba(63,193,201,.45);background:linear-gradient(135deg,rgba(63,193,201,.10),rgba(178,108,255,.08))}
+.donate h3{margin-top:0;color:var(--text)}
+.donate::after{content:"";display:block;clear:both}
+.fishimg{float:right;width:88px;height:88px;border-radius:16px;margin:0 0 8px 12px;box-shadow:0 0 18px rgba(63,193,201,.35)}
+select{font:inherit;background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px;min-height:42px;min-width:0}
+.readout{font-size:13px;color:var(--dim);margin:6px 0 0;font-variant-numeric:tabular-nums}
+.readout b{color:var(--text);font-weight:650}
+.readout .r{color:var(--r)}.readout .g{color:var(--g)}.readout .b{color:var(--b)}.readout .uv{color:var(--uv)}
+.pointbox{background:var(--card2);border:1px solid var(--accent);border-radius:12px;padding:12px;margin-top:10px}
+.pointbox .slider{margin:4px 0}
+tr.selpt td{background:#17405a}
+.sw1{display:inline-block;width:26px;height:22px;border-radius:6px;border:1px solid var(--line);vertical-align:middle;cursor:pointer}
+.single .ppcol{display:none}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140px);background:#0f2a3b;border:1px solid var(--line);padding:10px 16px;border-radius:12px;transition:transform .25s;max-width:calc(100% - 32px);z-index:5}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:var(--danger)}
+@media (max-width:520px){.slider{grid-template-columns:36px 1fr 42px}button{padding:10px 12px}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><a href="#" class="home"><img src="/icon-192.png" alt="" class="logo"><span class="wm">Lumin<span>Aqua</span></span></a></h1>
+    <div class="hright">
+      <span id="clock" style="color:var(--dim)"></span>
+      <a href="#about" class="hlink" id="aboutLink">About</a>
+      <a href="#" class="hlink" id="backLink">← Back</a>
+    </div>
+  </header>
+
+  <!-- ABOUT (shown at #about) -->
+  <section class="card" id="about">
+    <h2>About LuminAqua</h2>
+    <p class="lead">I built LuminAqua because I was tired of fighting with the official app for my lights. It was
+      lackluster, and I just wanted to control my lights <i>better</i>.</p>
+    <ul class="perks">
+      <li><b>Smooth day curves</b>: real sunrises and sunsets that glide minute by minute instead of jumping between steps.</li>
+      <li><b>All my lights in one place</b>: change one tank, or tick several and control them all at once. Feeding time, a new curve, lights off: one tap for every tank.</li>
+      <li><b>Any phone or computer</b>: no app to install, no account, no cloud. It runs on a Raspberry Pi next to the tanks.</li>
+    </ul>
+
+    <h3>Free, for everyone</h3>
+    <p>LuminAqua is completely free to use. I made it to solve a problem I had, and it was immediately clear it could help
+      a lot of other people with the same lights, so I felt obliged to share it.</p>
+
+    <h3>Make it better</h3>
+    <p>If you want to improve on LuminAqua, please do. I encourage it. Fork it, change it, add the feature you've been
+      missing, and send it back so everyone gets it. It's open source under the MIT licence.</p>
+    <p class="row"><a class="btn" id="repoLink" target="_blank" rel="noopener">View the code on GitHub</a></p>
+
+    <div class="donate">
+      <a id="fishLink" target="_blank" rel="noopener" aria-label="Buy me a fish on Ko-fi"><img class="fishimg" alt="A fish in a bag, ready to go home" src="data:image/jpeg;base64,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"></a>
+      <h3>🐟 Help me buy more fish</h3>
+      <p>Let's be honest: this hobby is expensive. Between fish, plants, CO₂, test kits and the next light I
+        definitely don't need, the tank always wins. If LuminAqua made your setup better, you can chip in toward my
+        next fish. It's never required, and the app stays free either way.</p>
+      <p class="row"><a class="btn primary" id="donateLink" target="_blank" rel="noopener">🐠 Buy me a fish</a></p>
+    </div>
+    <p class="note">LuminAqua is an independent project and isn't affiliated with or endorsed by the maker of your lights.</p>
+  </section>
+
+  <section class="card" id="lightsCard">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Lights <span class="hint" id="lightsHint">· tap a light to control it · tick boxes to edit several</span></h2>
+      <button onclick="openAdd()">+ Add light</button>
+    </div>
+    <div class="lights" id="lights"></div>
+    <div id="empty" class="emptybox" style="display:none">
+      <div style="font-size:34px">💡</div>
+      <b>No lights yet</b>
+      <p class="note" style="margin:6px 0 12px">Turn your Week Aqua lights on, close the official app on your phone (a light connected to the app is invisible to everyone else), then search.</p>
+      <button class="primary" onclick="openAdd()">Find my lights</button>
+    </div>
+    <div id="addPanel" class="pointbox" style="display:none">
+      <div class="row" style="justify-content:space-between"><b>Add a light</b><button onclick="closeAdd()">Close</button></div>
+      <p class="note" id="scanNote"></p>
+      <div id="scanList"></div>
+      <div class="row" style="margin-top:10px"><button id="rescan" onclick="doScan()">Search again</button></div>
+      <details style="margin-top:12px"><summary>Add by Bluetooth address</summary>
+        <div class="row" style="margin-top:8px"><input id="manMac" class="txt grow" placeholder="AA:BB:CC:DD:EE:FF" autocapitalize="characters"><input id="manName" class="txt grow" placeholder="Name, e.g. 40g Breeder"><button onclick="addManual()">Add</button></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- SCHEDULE: one card, three tabs -->
+  <section class="card">
+    <h2>Schedule <span class="for" data-for></span></h2>
+    <div class="tabs" id="tabs">
+      <button data-tab="curve"><span class="long">Smooth Day Curve</span><span class="short">Day Curve</span><span class="badge"></span></button>
+      <button data-tab="timer"><span class="long">Daily Timer</span><span class="short">Timer</span><span class="badge"></span></button>
+      <button data-tab="advanced"><span class="long">Advanced (8-Step)</span><span class="short">8-Step</span><span class="badge"></span></button>
+    </div>
+
+    <!-- SMOOTH CURVE -->
+    <div class="tab" id="tab-curve">
+      <p class="note" style="margin:0 0 10px">Like Fluval's day curve: LuminAqua glides between your points, updating the light every minute. Drag a point, or tap it to see and edit it.</p>
+      <div class="row" style="margin-bottom:10px">
+        <select id="profSel" class="grow"></select>
+        <button onclick="saveProfile()">Save as profile…</button>
+        <button id="profDel" class="danger" onclick="deleteProfile()" style="display:none">Delete</button>
+      </div>
+      <div class="seg" id="cmode" style="margin-bottom:8px"></div>
+      <svg id="curve" viewBox="0 0 700 260" style="width:100%;height:auto;touch-action:none;display:block"></svg>
+      <div class="readout" id="cnow"></div>
+      <div class="pointbox" id="cpoint" style="display:none"></div>
+      <table class="pts" style="margin-top:8px">
+        <thead><tr><th style="width:44%">Time</th><th>Brightness %</th><th class="ppcol" style="width:52px">Colour</th><th style="width:50px"></th></tr></thead>
+        <tbody id="cpts"></tbody>
+      </table>
+      <div class="row" style="margin-top:8px"><button onclick="addPoint()">+ Add point</button></div>
+      <div id="singleColor"><h3>Colour</h3><div id="curveColors"></div></div>
+      <p class="ow" data-ow="curve"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="primary grow" onclick="saveCurve()">Save &amp; run smooth curve</button>
+        <span class="dirty" id="cdirty">Unsaved changes</span>
+      </div>
+      <p class="note" id="curveNote"></p>
+    </div>
+
+    <!-- DAILY TIMER -->
+    <div class="tab" id="tab-timer">
+      <p class="note" style="margin:0 0 10px">The official app's "Mode setting": the light switches itself on and off at these times, with an optional fade.</p>
+      <div class="timer">
+        <svg class="ring" id="ring" viewBox="0 0 200 200"></svg>
+        <div>
+          <div class="times">
+            <label for="tOn">☀ On</label><input id="tOn" type="time" step="300">
+            <label for="tOff">☾ Off</label><input id="tOff" type="time" step="300">
+          </div>
+          <h3>Sunrise / sunset fade</h3>
+          <div class="seg" id="ramp"></div>
+        </div>
+      </div>
+      <h3>Colour</h3>
+      <div id="timerColors"></div>
+      <p class="ow" data-ow="timer"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="primary grow" onclick="saveTimer()">Save daily timer</button>
+        <span class="dirty" id="dirty">Unsaved changes</span>
+      </div>
+    </div>
+
+    <!-- ADVANCED -->
+    <div class="tab" id="tab-advanced">
+      <p class="note" style="margin:0 0 10px">The official app's "Advanced setting": up to 8 periods stored on the light. It jumps between levels; the smooth curve glides.</p>
+      <div class="timeline" id="timeline"></div>
+      <div class="tlaxis" id="tlaxis"></div>
+      <div id="adv"></div>
+      <p class="ow" data-ow="advanced"></p>
+      <div class="row" style="margin-top:10px">
+        <button onclick="addSlot()">+ Add period</button>
+        <button class="primary grow" onclick="sendAdvanced()">Send &amp; switch to advanced mode</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT NOW -->
+  <section class="card">
+    <h2>Right now (temporary) <span class="for" data-for></span></h2>
+    <div class="chips" id="nowColors"></div>
+    <div id="sliders" style="margin-top:10px"></div>
+    <div class="slider"><label>All</label><input id="master" type="range" min="0" max="100" value="100" style="--c:#fff"><output id="masterOut">100%</output></div>
+    <h3>For</h3>
+    <div class="seg" id="dur"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary grow" onclick="ovr(true)">Turn on</button>
+      <button class="grow" onclick="ovr(false)">Turn off</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button onclick="savePreset()">Save sliders as preset…</button>
+      <button onclick="useForTimer()">Use sliders for daily timer</button>
+    </div>
+    <p class="note">Afterwards the lights go back to their schedule automatically.</p>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+// Project links shown on the About page. A link that is empty or still has a <placeholder> is hidden.
+const LINKS={
+  repo:"https://github.com/n72826/luminaqua",
+  donate:"https://ko-fi.com/H3A62AWGP3",
+};
+const CH=[["R","--r"],["G","--g"],["B","--b"],["UV","--uv"]];
+const DUR=[[15,"15 min"],[30,"30 min"],[60,"1 h"],[120,"2 h"],[240,"4 h"]];
+let S=null, T=null, dirty=false, adv=[], dur=60, nowPreset=null, selected=new Set(), loadedFor="";
+const selLights=()=>S.lights.filter(l=>selected.has(l.mac));
+const targets=()=>[...selected];
+const forLabel=()=>{const ls=selLights();return ls.length===S.lights.length&&ls.length>1?(ls.length===2?"· both lights":`· all ${ls.length} lights`):ls.length?"· "+ls.map(l=>l.name).join(" & "):"· no light selected";};
+const sameTimer=(a,b)=>JSON.stringify([a.start,a.end,a.ramp,a.preset,a.ch])===JSON.stringify([b.start,b.end,b.ramp,b.preset,b.ch]);
+const $=id=>document.getElementById(id);
+const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
+const fmt=m=>String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+// "18:00" -> "6:00 PM"; "24:00"/"00:00" -> "12:00 AM"
+const t12=t=>{const [h,m]=t.split(":").map(Number),hh=h%24;return `${hh%12||12}:${String(m).padStart(2,"0")} ${hh<12?"AM":"PM"}`;};
+
+function toast(msg,err){const t=$("toast");t.textContent=msg;t.className="show"+(err?" err":"");clearTimeout(t._h);t._h=setTimeout(()=>t.className="",3800);}
+async function api(path,body,method){
+  const r=await fetch(path,{method:method||(body?"POST":"GET"),headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(typeof j.detail==="string"?j.detail:JSON.stringify(j.detail||j));
+  return j;
+}
+function busy(on){document.querySelectorAll("button").forEach(b=>b.disabled=on);}
+const name=mac=>(S.lights.find(l=>l.mac===mac)||{}).name||mac;
+async function run(label,fn,anyLight){
+  if(!anyLight&&!selected.size){toast("Tap a light first to choose which one to control",true);return false;}
+  busy(true);toast(label+"…");
+  try{
+    const res=await fn();
+    const bad=Object.entries(res||{}).filter(([k,v])=>k.includes(":")&&v!=="ok");
+    toast(bad.length?"Partly failed: "+bad.map(([m,v])=>name(m)+": "+v).join("; "):(res&&res.note)||label+" ✓",bad.length>0);
+    busy(false);await refresh();return true;
+  }catch(e){toast(label+" failed: "+e.message,true);}
+  busy(false);await refresh();return false;
+}
+
+/* ---------- chips ---------- */
+function chip(n,ch,{sel,del,onclick}){
+  const el=document.createElement("span");el.className="chip"+(sel?" sel":"");
+  el.innerHTML=`<span class="sw">${ch.map((v,i)=>`<i style="background:var(${CH[i][1]});opacity:${.15+.85*v/100}"></i>`).join("")}</span><span></span>`;
+  el.lastChild.textContent=n;el.title=ch.map((v,i)=>CH[i][0]+" "+v+"%").join(" · ");
+  el.onclick=onclick;
+  if(del){const x=document.createElement("span");x.className="x";x.textContent="×";x.onclick=e=>{e.stopPropagation();delPreset(n);};el.append(x);}
+  return el;
+}
+function allColors(){return [...Object.entries(S.app_presets).map(([n,c])=>({n,c,factory:true})),...Object.entries(S.presets).map(([n,c])=>({n,c,factory:false}))];}
+
+/* ---------- daily timer ---------- */
+function markDirty(){dirty=true;$("dirty").classList.add("show");drawRing();}
+function renderTimer(){
+  $("tOn").value=T.start;$("tOff").value=T.end==="24:00"?"00:00":T.end;
+  const rb=$("ramp");rb.innerHTML="";
+  S.ramp_hours.forEach((h,i)=>{const b=document.createElement("button");b.textContent=h+" h";if(i===T.ramp)b.className="sel";b.onclick=()=>{T.ramp=i;markDirty();renderTimer();};rb.append(b);});
+  renderTimerColors();drawRing();
+}
+// Same picker as the curve: stock presets, saved presets, and Custom with inline R/G/B/UV sliders.
+function renderTimerColors(){colorPicker($("timerColors"),T,markDirty);}
+const cleanTimer=t=>({start:t.start,end:t.end,ramp:t.ramp,preset:t.preset||null,ch:t.ch.map(Number)});
+$("tOn").onchange=e=>{T.start=e.target.value;markDirty();};
+$("tOff").onchange=e=>{T.end=e.target.value==="00:00"?"24:00":e.target.value;markDirty();};
+
+function arc(cx,cy,r,a0,a1){ // angles in minutes of day, 0 at top
+  const p=m=>{const a=(m/1440)*2*Math.PI-Math.PI/2;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  let span=(a1-a0+1440)%1440;if(span===0)span=1439.9;
+  const [x0,y0]=p(a0),[x1,y1]=p(a0+span);
+  return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${span>720?1:0} 1 ${x1.toFixed(1)},${y1.toFixed(1)}`;
+}
+function drawRing(){
+  const on=toMin(T.start),off=T.end==="24:00"?1440:toMin(T.end),fade=S.ramp_hours[T.ramp]*60;
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes();
+  const pt=(m,r)=>{const a=(m/1440)*2*Math.PI-Math.PI/2;return [100+r*Math.cos(a),100+r*Math.sin(a)];};
+  const col=`rgb(${Math.round(60+195*T.ch[0]/100)},${Math.round(60+195*T.ch[1]/100)},${Math.round(80+175*T.ch[2]/100)})`;
+  let s=`<circle cx="100" cy="100" r="80" fill="none" stroke="#1d3550" stroke-width="18"/>`;
+  s+=`<path d="${arc(100,100,80,on%1440,off%1440)}" fill="none" stroke="${col}" stroke-width="18" stroke-linecap="butt"/>`;
+  if(fade>0){
+    s+=`<path d="${arc(100,100,80,on%1440,(on+fade)%1440)}" fill="none" stroke="#0e2131" stroke-opacity=".45" stroke-width="18"/>`;
+    s+=`<path d="${arc(100,100,80,(off-fade+1440)%1440,off%1440)}" fill="none" stroke="#0e2131" stroke-opacity=".45" stroke-width="18"/>`;
+  }
+  [[0,"12 AM"],[6,"6 AM"],[12,"12 PM"],[18,"6 PM"]].forEach(([h,l])=>{const [x,y]=pt(h*60,55);s+=`<text x="${x}" y="${y+4}" fill="#8aa6bb" font-size="10" text-anchor="middle">${l}</text>`;});
+  const [nx,ny]=pt(nm,80);s+=`<circle cx="${nx}" cy="${ny}" r="5" fill="#fff"/>`;
+  s+=`<text x="100" y="96" fill="#e6f1f8" font-size="17" font-weight="600" text-anchor="middle">${t12(T.start)}</text>`;
+  s+=`<text x="100" y="118" fill="#8aa6bb" font-size="14" text-anchor="middle">to ${t12(T.end)}</text>`;
+  $("ring").innerHTML=s;
+}
+async function saveTimer(){
+  if(T.start===T.end){toast("On and off times can't be the same",true);return;}
+  const wasDirty=dirty;dirty=false; // let refresh() load the saved timer
+  if(await run("Saving daily timer",()=>api("/api/timer",{...cleanTimer(T),targets:targets()}))) $("dirty").classList.remove("show");
+  else dirty=wasDirty;
+}
+function useForTimer(){T.ch=sliderVals();T.preset=nowPreset;delete T._custom;markDirty();renderTimerColors();showTab("timer");$("tabs").scrollIntoView({behavior:"smooth",block:"start"});toast("Daily colour changed — press Save daily timer");}
+
+/* ---------- smooth curve ---------- */
+let C=null, cdirty=false, cView=null, drag=null, selPt=null;
+// Phones get a narrower drawing so text and points come out bigger on screen.
+let CW=700,CH_=260,FS=11;const PAD={l:38,r:12,t:12,b:30};
+function chartSize(){const n=window.innerWidth<560;CW=n?380:700;CH_=n?250:260;FS=n?13:11;PAD.l=n?40:38;$("curve").setAttribute("viewBox",`0 0 ${CW} ${CH_}`);}
+window.addEventListener("resize",()=>{if(C&&!drag)drawCurve();});
+const ML=()=>S.max_level||235;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const pp=()=>C.mode==="per_point";
+// Same maths as the Pi (protocol.curve_raw): colour x brightness at each point, channels interpolated separately.
+const colorRaw=(preset,ch)=>preset&&S.app_presets_raw[preset]?S.app_presets_raw[preset]:ch.map(v=>Math.round(Math.max(0,Math.min(100,v))/100*ML()));
+const pointColor=p=>pp()&&p.ch?colorRaw(p.preset,p.ch):colorRaw(C.preset,C.ch);
+const anchorRaw=p=>pointColor(p).map(v=>v*(+p.pct)/100);
+function curveRawAt(m){
+  const pts=C.points,ms=pts.map(p=>toMin(p.t));
+  if(m<ms[0]||m>ms[ms.length-1])return [0,0,0,0];
+  for(let i=0;i<pts.length-1;i++)if(m<=ms[i+1]){
+    const a=anchorRaw(pts[i]),b=anchorRaw(pts[i+1]),f=ms[i+1]===ms[i]?0:(m-ms[i])/(ms[i+1]-ms[i]);
+    return a.map((x,k)=>Math.round(x+(b[k]-x)*f));}
+  return anchorRaw(pts[pts.length-1]).map(Math.round);
+}
+function curveAt(m){const p=C.points.map(q=>[toMin(q.t),+q.pct]);if(m<p[0][0]||m>p[p.length-1][0])return 0;
+  for(let i=1;i<p.length;i++)if(m<=p[i][0])return p[i][0]===p[i-1][0]?p[i][1]:p[i-1][1]+(p[i][1]-p[i-1][1])*(m-p[i-1][0])/(p[i][0]-p[i-1][0]);return 0;}
+const rawPct=r=>r.map(v=>Math.round(v/ML()*100));
+const chText=pc=>`<span class="r">R ${pc[0]}%</span> • <span class="g">G ${pc[1]}%</span> • <span class="b">B ${pc[2]}%</span> • <span class="uv">UV ${pc[3]}%</span>`;
+const rgbOf=ch=>`rgb(${Math.round(60+195*ch[0]/100)},${Math.round(60+195*ch[1]/100)},${Math.round(80+175*ch[2]/100)})`;
+const colorPctOf=(preset,ch)=>preset&&S.app_presets[preset]?S.app_presets[preset]:ch;
+const pointRGB=p=>rgbOf(pp()&&p.ch?colorPctOf(p.preset,p.ch):colorPctOf(C.preset,C.ch));
+function cleanCurve(c){return {mode:c.mode||"single",preset:c.preset||null,ch:c.ch.map(Number),
+  points:c.points.map(p=>({t:p.t,pct:+p.pct,preset:p.preset||null,ch:p.ch?p.ch.map(Number):null}))};}
+function cMarkDirty(){cdirty=true;$("cdirty").classList.add("show");drawCurve();}
+
+/* colour picker: stock presets, saved presets, and Custom (R/G/B/UV sliders). obj = {preset, ch} */
+function colorPicker(box,obj,onchange){
+  box.innerHTML="";
+  const chips=document.createElement("div");chips.className="chips";
+  const same=c=>c.every((v,i)=>Math.abs(v-obj.ch[i])<1);
+  let matched=false;
+  allColors().forEach(({n,c,factory})=>{
+    const isSel=!obj._custom&&(factory?obj.preset===n:(!obj.preset&&same(c)&&!matched));
+    if(isSel)matched=true;
+    chips.append(chip(n,c,{sel:isSel,onclick:()=>{obj.ch=[...c];obj.preset=factory?n:null;delete obj._custom;onchange();colorPicker(box,obj,onchange);}}));
+  });
+  chips.append(chip("Custom",obj.ch,{sel:!matched,onclick:()=>{obj.preset=null;obj._custom=true;colorPicker(box,obj,onchange);}}));
+  box.append(chips);
+  if(matched)return;
+  const sl=document.createElement("div");sl.style.marginTop="8px";
+  CH.forEach(([lab,col],i)=>{
+    const d=document.createElement("div");d.className="slider";
+    d.innerHTML=`<label style="color:var(${col})">${lab}</label><input type="range" min="0" max="100" value="${Math.round(obj.ch[i])}" style="--c:var(${col})"><output>${Math.round(obj.ch[i])}%</output>`;
+    d.querySelector("input").oninput=e=>{obj.ch[i]=+e.target.value;obj.preset=null;obj._custom=true;d.querySelector("output").textContent=e.target.value+"%";onchange();};
+    sl.append(d);
+  });
+  box.append(sl);
+}
+
+/* graph */
+function curveView(){ // visible time range: the points with an hour either side, at least 6 h
+  const ms=C.points.map(p=>toMin(p.t));let a=Math.max(0,Math.min(...ms)-60),b=Math.min(1440,Math.max(...ms)+60);
+  if(b-a<360){const m=(a+b)/2;a=Math.max(0,m-180);b=Math.min(1440,a+360);}
+  return [Math.floor(a/60)*60,Math.ceil(b/60)*60];
+}
+const cx=m=>PAD.l+(m-cView[0])/(cView[1]-cView[0])*(CW-PAD.l-PAD.r);
+const cy=v=>PAD.t+(1-v/100)*(CH_-PAD.t-PAD.b);
+function drawCurve(){
+  if(!drag){chartSize();cView=curveView();}
+  const pts=C.points.map(p=>[cx(toMin(p.t)),cy(+p.pct)]),w=CW-PAD.l-PAD.r;
+  let s=`<defs><linearGradient id="cg" gradientUnits="userSpaceOnUse" x1="${PAD.l}" x2="${CW-PAD.r}" y1="0" y2="0">`+
+    C.points.map((p,i)=>`<stop offset="${Math.max(0,Math.min(1,(pts[i][0]-PAD.l)/w)).toFixed(4)}" stop-color="${pointRGB(p)}"/>`).join("")+`</linearGradient></defs>`;
+  [0,25,50,75,100].forEach(v=>{s+=`<line x1="${PAD.l}" x2="${CW-PAD.r}" y1="${cy(v)}" y2="${cy(v)}" stroke="#1d3550"/><text x="${PAD.l-6}" y="${cy(v)+4}" fill="#8aa6bb" font-size="${FS}" text-anchor="end">${v}%</text>`;});
+  const span=cView[1]-cView[0],pxPerH=(CW-PAD.l-PAD.r)/(span/60),stepH=[1,2,3,4,6].find(h=>h*pxPerH>=FS*4.6)||6;
+  for(let m=cView[0];m<=cView[1];m+=stepH*60){s+=`<line x1="${cx(m)}" x2="${cx(m)}" y1="${PAD.t}" y2="${CH_-PAD.b}" stroke="#16304a"/><text x="${cx(m)}" y="${CH_-10}" fill="#8aa6bb" font-size="${FS}" text-anchor="middle">${t12(fmt(m)).replace(":00","")}</text>`;}
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  s+=`<path d="${line} L${pts[pts.length-1][0]},${cy(0)} L${pts[0][0]},${cy(0)} Z" fill="url(#cg)" fill-opacity=".22"/>`;
+  s+=`<path d="${line}" fill="none" stroke="url(#cg)" stroke-width="3" stroke-linejoin="round"/>`;
+  const n=new Date(),nm=n.getHours()*60+n.getMinutes()+n.getSeconds()/60;
+  const showNow=nm>=cView[0]&&nm<=cView[1],nv=showNow?curveAt(nm):0;
+  if(showNow)s+=`<line x1="${cx(nm)}" x2="${cx(nm)}" y1="${PAD.t}" y2="${CH_-PAD.b}" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 4"/>`;
+  pts.forEach((p,i)=>{const sel=i===selPt;s+=`<circle data-i="${i}" cx="${p[0]}" cy="${p[1]}" r="${sel?12:9}" fill="${pp()?pointRGB(C.points[i]):"#0b1a24"}" stroke="${sel?"#fff":pointRGB(C.points[i])}" stroke-width="3" pointer-events="none"/>`;});
+  // invisible, finger-sized touch targets on top of each point
+  pts.forEach((p,i)=>{s+=`<circle data-i="${i}" cx="${p[0]}" cy="${p[1]}" r="20" fill="transparent" style="cursor:grab"/>`;});
+  if(showNow){ // "now X%" as a dark pill, placed where it doesn't cover an anchor point
+    const px=cx(nm),py=cy(nv),label=`now ${Math.round(nv)}%`,lw=label.length*FS*.62+16,lh=FS+11;
+    const inside=([x,y])=>x>=PAD.l+2&&x+lw<=CW-PAD.r&&y>=2&&y+lh<=CH_-PAD.b-2;
+    const clear=([x,y])=>!pts.some(([dx,dy])=>dx>x-14&&dx<x+lw+14&&dy>y-14&&dy<y+lh+14);
+    const spots=[[px+10,py-lh-10],[px-lw-10,py-lh-10],[px+10,py+10],[px-lw-10,py+10],[px+10,py-lh-38],[px-lw-10,py-lh-38],[px+10,py+38],[px-lw-10,py+38]];
+    const at=spots.find(q=>inside(q)&&clear(q))||spots.find(inside)||[Math.max(PAD.l,Math.min(px+10,CW-PAD.r-lw)),PAD.t];
+    s+=`<circle cx="${px}" cy="${py}" r="5" fill="#fff"/><g pointer-events="none"><rect x="${at[0]}" y="${at[1]}" width="${lw}" height="${lh}" rx="11" fill="#0b1a24" fill-opacity=".92" stroke="#3a5a78"/>`+
+      `<text x="${at[0]+lw/2}" y="${at[1]+lh/2+FS*.36}" fill="#fff" font-size="${FS+1}" font-weight="600" text-anchor="middle">${label}</text></g>`;
+  }
+  $("curve").innerHTML=s;
+  updateReadouts();
+}
+function updateReadouts(){
+  const n=new Date(),nm=n.getHours()*60+n.getMinutes()+n.getSeconds()/60,first=C.points[0].t,last=C.points[C.points.length-1].t;
+  const ls=selLights(),running=ls.length&&ls.every(l=>l.mode==="curve");
+  let h=nm<toMin(first)||nm>toMin(last)?`Now: <b>off</b> — the curve runs ${t12(first)} – ${t12(last)}`
+    :`Now: <b>${Math.round(curveAt(nm))}%</b> — ${chText(rawPct(curveRawAt(nm)))}`;
+  if(cdirty)h+=` <span class="warn">(your unsaved edits — the light keeps its saved settings until you save)</span>`;
+  else if(!running)h+=` <span class="warn">(not running on ${ls.length>1?"these lights":"this light"} — press Save &amp; run)</span>`;
+  const peak=[0,1,2,3].map(k=>Math.max(...C.points.map(p=>anchorRaw(p)[k])));
+  h+=`<br>Peak output: ${chText(rawPct(peak.map(Math.round)))}`;
+  $("cnow").innerHTML=h;
+  $("curveNote").textContent=`The light is off before ${t12(first)} and after ${t12(last)}. If the Pi ever stops, the light holds its last level and still switches itself off at ${t12(last)}.`
+    +(+C.points[C.points.length-1].pct>0?` Tip: your last point isn't 0%, so the light will switch off suddenly at ${t12(last)}.`:"");
+  const head=$("cpointHead");
+  if(head&&selPt!=null&&C.points[selPt]){const p=C.points[selPt];
+    head.innerHTML=`<b>Point ${selPt+1}</b> · ${t12(p.t)} · <b>${Math.round(p.pct)}%</b><br>Output at this point: ${chText(rawPct(anchorRaw(p).map(Math.round)))}`;}
+}
+
+/* point panel: readout, per-point colour, preview on the light */
+function selectPoint(i){selPt=i;renderCurve();}
+function renderPointBox(){
+  const box=$("cpoint");
+  if(selPt==null||!C.points[selPt]){box.style.display="none";box.innerHTML="";return;}
+  const p=C.points[selPt];box.style.display="";
+  box.innerHTML=`<div class="readout" id="cpointHead" style="margin:0"></div><div id="cpointColor"></div>
+    <div class="row" style="margin-top:10px"><button class="primary" onclick="previewPoint()">Preview this point on light (60 s)</button>
+    <button onclick="backToLive()">Back to live curve</button><button onclick="selectPoint(null)">Close</button></div>`;
+  if(pp()){
+    if(!p.ch){p.preset=C.preset;p.ch=[...C.ch];}
+    const h=document.createElement("h3");h.textContent="Colour at this point";$("cpointColor").append(h);
+    const pick=document.createElement("div");$("cpointColor").append(pick);
+    colorPicker(pick,p,()=>{cMarkDirty();renderPointsTable();});
+  }
+  updateReadouts();
+}
+function previewPoint(){
+  const p=C.points[selPt],ch=anchorRaw(p).map(v=>Math.round(v)/ML()*100);
+  run(`Previewing ${t12(p.t)}`,()=>api("/api/override",{on:true,minutes:1,ch,preset:null,targets:targets()}))
+    .then(ok=>ok&&toast(`Showing ${t12(p.t)} for 60 s, then back to normal automatically`));
+}
+function backToLive(){run("Back to live",()=>api("/api/normal",{targets:targets()}));}
+
+/* table, mode, colours, profiles */
+function renderPointsTable(){
+  const tb=$("cpts");tb.innerHTML="";
+  C.points.forEach((p,i)=>{
+    const tr=document.createElement("tr");if(i===selPt)tr.className="selpt";
+    tr.innerHTML=`<td><input type="time" step="300" value="${p.t}"></td><td><input type="number" min="0" max="100" value="${Math.round(p.pct)}"></td>`+
+      `<td class="ppcol" style="text-align:center"><span class="sw1" title="Edit this point's colour" style="background:${pointRGB(p)}"></span></td>`+
+      `<td><button class="danger" style="min-height:34px;padding:4px 10px">×</button></td>`;
+    const [ti,pi]=tr.querySelectorAll("input");
+    ti.onchange=()=>{if(ti.value){const keep=C.points[i];p.t=ti.value;C.points.sort((a,b)=>toMin(a.t)-toMin(b.t));if(selPt!=null)selPt=C.points.indexOf(keep);cMarkDirty();renderCurve();}};
+    pi.oninput=()=>{p.pct=Math.max(0,Math.min(100,Math.round(+pi.value||0)));cMarkDirty();};
+    ti.onfocus=pi.onfocus=()=>{if(selPt!==i){selPt=i;renderPointBox();drawCurve();tb.querySelectorAll("tr").forEach((r,k)=>r.className=k===i?"selpt":"");}};
+    tr.querySelector(".sw1").onclick=()=>selectPoint(i);
+    tr.querySelector("button").onclick=()=>{if(C.points.length<=2){toast("A curve needs at least 2 points",true);return;}
+      C.points.splice(i,1);if(selPt===i)selPt=null;else if(selPt>i)selPt--;cMarkDirty();renderCurve();};
+    tb.append(tr);
+  });
+}
+function renderMode(){
+  const b=$("cmode");b.innerHTML="";
+  [["single","Single colour"],["per_point","Per-point colour (day sim)"]].forEach(([m,l])=>{
+    const x=document.createElement("button");x.textContent=l;if((C.mode||"single")===m)x.className="sel";
+    x.onclick=()=>{if(C.mode===m)return;C.mode=m;
+      if(m==="per_point")C.points.forEach(p=>{if(!p.ch){p.preset=C.preset;p.ch=[...C.ch];}});
+      cMarkDirty();renderCurve();};
+    b.append(x);
+  });
+}
+function renderProfiles(){
+  const sel=$("profSel"),cur=sel.value;sel.innerHTML=`<option value="">Load a curve profile…</option>`;
+  const grp=(label,obj,pre)=>{const names=Object.keys(obj);if(!names.length)return;const g=document.createElement("optgroup");g.label=label;
+    names.forEach(n=>{const o=document.createElement("option");o.value=pre+n;o.textContent=n;g.append(o);});sel.append(g);};
+  grp("Starter templates",S.curve_templates,"t:");grp("My profiles",S.curve_profiles,"p:");
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;
+  $("profDel").style.display=sel.value.startsWith("p:")?"":"none";
+}
+$("profSel").onchange=e=>{
+  const v=e.target.value;$("profDel").style.display=v.startsWith("p:")?"":"none";if(!v)return;
+  const src=v.startsWith("t:")?S.curve_templates[v.slice(2)]:S.curve_profiles[v.slice(2)];if(!src)return;
+  C=clone(src);C.mode=C.mode||"single";selPt=null;cMarkDirty();renderCurve();
+  toast(`Loaded "${v.slice(2)}" — press Save & run to use it`);
+};
+async function saveProfile(){
+  const cur=$("profSel").value,n=prompt("Name for this curve profile?",cur.startsWith("p:")?cur.slice(2):"");if(!n||!n.trim())return;
+  try{await api("/api/curve_profiles",{name:n.trim(),curve:cleanCurve(C)});await refresh();$("profSel").value="p:"+n.trim();renderProfiles();toast(`Saved profile "${n.trim()}"`);}
+  catch(e){toast(e.message,true);}
+}
+async function deleteProfile(){
+  const v=$("profSel").value;if(!v.startsWith("p:"))return;if(!confirm(`Delete curve profile "${v.slice(2)}"?`))return;
+  await api("/api/curve_profiles/"+encodeURIComponent(v.slice(2)),null,"DELETE");$("profSel").value="";await refresh();
+}
+function renderCurve(){
+  renderMode();renderProfiles();
+  $("cpts").closest("table").classList.toggle("single",!pp());
+  $("singleColor").style.display=pp()?"none":"";
+  if(!pp())colorPicker($("curveColors"),C,()=>{cMarkDirty();renderPointsTable();});
+  renderPointsTable();renderPointBox();drawCurve();
+}
+function addPoint(){
+  if(C.points.length>=24){toast("Up to 24 points",true);return;}
+  const gap=i=>toMin(C.points[i+1].t)-toMin(C.points[i].t);
+  let best=0;for(let i=1;i<C.points.length-1;i++)if(gap(i)>gap(best))best=i;
+  const a=toMin(C.points[best].t),b=toMin(C.points[best+1].t),m=Math.round((a+b)/2/5)*5;
+  if(m<=a||m>=b){toast("No room between points — change a time first",true);return;}
+  const prev=C.points[best]; // new points inherit the previous point's colour
+  C.points.splice(best+1,0,{t:fmt(m),pct:Math.round(curveAt(m)),preset:prev.preset||null,ch:prev.ch?[...prev.ch]:null});
+  selPt=best+1;cMarkDirty();renderCurve();
+}
+function svgPt(e){const r=$("curve").getBoundingClientRect();return [(e.clientX-r.left)*CW/r.width,(e.clientY-r.top)*CH_/r.height];}
+$("curve").addEventListener("pointerdown",e=>{const i=e.target.dataset&&e.target.dataset.i;if(i==null)return;
+  drag={i:+i,moved:false};if(selPt!==+i){selPt=+i;renderPointBox();}$("curve").setPointerCapture(e.pointerId);e.preventDefault();drawCurve();});
+$("curve").addEventListener("pointermove",e=>{
+  if(!drag)return;const [x,y]=svgPt(e),p=C.points[drag.i];
+  const lo=drag.i>0?toMin(C.points[drag.i-1].t)+5:0,hi=drag.i<C.points.length-1?toMin(C.points[drag.i+1].t)-5:1440;
+  let m=cView[0]+(x-PAD.l)/(CW-PAD.l-PAD.r)*(cView[1]-cView[0]);m=Math.round(Math.max(lo,Math.min(hi,m))/5)*5;
+  p.t=fmt(Math.min(m,1435));p.pct=Math.round(Math.max(0,Math.min(100,(1-(y-PAD.t)/(CH_-PAD.t-PAD.b))*100)));
+  drag.moved=true;cdirty=true;$("cdirty").classList.add("show");drawCurve();
+});
+const endDrag=()=>{if(drag){const moved=drag.moved;drag=null;if(moved)renderCurve();}};
+$("curve").addEventListener("pointerup",endDrag);$("curve").addEventListener("pointercancel",endDrag);
+async function saveCurve(){
+  const ms=C.points.map(p=>toMin(p.t));if(ms.some((m,i)=>i&&m<=ms[i-1])){toast("Each point must be later than the one before",true);return;}
+  const was=cdirty;cdirty=false;
+  if(await run("Starting smooth curve",()=>api("/api/curve",{...cleanCurve(C),targets:targets()}))) $("cdirty").classList.remove("show");
+  else cdirty=was;
+}
+
+/* ---------- right now ---------- */
+function sliderVals(){const m=+$("master").value/100;return CH.map((_,i)=>Math.round(+$("s"+i).value*m));}
+function setSliders(ch){$("master").value=100;$("masterOut").textContent="100%";ch.forEach((v,i)=>{$("s"+i).value=v;$("o"+i).textContent=v+"%";});}
+function renderNowColors(){
+  const box=$("nowColors");box.innerHTML="";
+  allColors().forEach(({n,c,factory})=>box.append(chip(n,c,{sel:nowPreset===n,del:false,onclick:()=>{setSliders(c);nowPreset=factory?n:null;renderNowColors();}})));
+}
+function renderDur(){const b=$("dur");b.innerHTML="";DUR.forEach(([m,l])=>{const x=document.createElement("button");x.textContent=l;if(m===dur)x.className="sel";x.onclick=()=>{dur=m;renderDur();};b.append(x);});}
+function ovr(on){
+  const ch=sliderVals(),preset=(nowPreset&&S.app_presets[nowPreset]&&+$("master").value===100&&S.app_presets[nowPreset].every((v,i)=>v===ch[i]))?nowPreset:null;
+  run(on?"Turning on":"Turning off",()=>api("/api/override",{on,minutes:dur,ch,preset,targets:targets()}));
+}
+async function savePreset(){const n=prompt("Preset name?");if(!n)return;try{await api("/api/presets",{name:n.trim(),ch:sliderVals()});toast("Saved "+n);refresh();}catch(e){toast(e.message,true);}}
+async function delPreset(n){if(!confirm(`Delete preset "${n}"?`))return;await api("/api/presets/"+encodeURIComponent(n),null,"DELETE");refresh();}
+
+/* ---------- advanced ---------- */
+function renderAdv(){
+  // One block per period: start / end / delete on top, R G B UV (%) below — fits a phone.
+  const box=$("adv");box.innerHTML="";
+  if(!adv.length){box.innerHTML=`<p class="note">No periods yet — tap “+ Add period”.</p>`;}
+  adv.forEach((s,i)=>{
+    const d=document.createElement("div");d.className="period";
+    d.innerHTML=`<div class="prow"><label>Start<input type="time" step="300" value="${s.start}" data-k="start"></label>`+
+      `<label>End<input type="time" step="300" value="${s.end==="24:00"?"00:00":s.end}" data-k="end"></label>`+
+      `<button class="danger del" title="Remove period">×</button></div>`+
+      `<div class="prow ch">`+s.ch.map((v,c)=>`<label style="color:var(${CH[c][1]})">${CH[c][0]} %<input type="number" inputmode="numeric" min="0" max="100" value="${v}" data-c="${c}"></label>`).join("")+`</div>`;
+    d.querySelectorAll("input").forEach(inp=>inp.oninput=()=>{if(inp.dataset.k)s[inp.dataset.k]=(inp.dataset.k==="end"&&inp.value==="00:00")?"24:00":inp.value;else s.ch[+inp.dataset.c]=Math.max(0,Math.min(100,+inp.value||0));drawTimeline();});
+    d.querySelector("button").onclick=()=>{adv.splice(i,1);renderAdv();};
+    box.append(d);
+  });
+  drawTimeline();
+}
+function drawTimeline(){
+  const tl=$("timeline");tl.innerHTML="";
+  // hour scale under the bar (every 3 h, or 6 h on a phone) + matching gridlines and a "now" line
+  const step=window.innerWidth<560?6:3,ax=$("tlaxis");ax.innerHTML="";
+  for(let h=0;h<=24;h+=step){
+    const sp=document.createElement("span");sp.style.left=(h/24*100)+"%";sp.textContent=t12(fmt(h*60)).replace(":00","");ax.append(sp);
+    if(h>0&&h<24){const g=document.createElement("div");g.className="gl";g.style.left=(h/24*100)+"%";tl.append(g);}
+  }
+  const n=new Date(),nw=document.createElement("div");nw.className="now";nw.style.left=((n.getHours()*60+n.getMinutes())/14.4)+"%";nw.title="now";tl.append(nw);
+  adv.forEach(s=>{
+    if(!/^\d\d:\d\d$/.test(s.start)||!/^\d\d:\d\d$/.test(s.end))return;
+    const a=toMin(s.start),b=toMin(s.end);if(b<=a)return;
+    const d=document.createElement("div");d.className="s";d.style.left=(a/14.4)+"%";d.style.width=((b-a)/14.4)+"%";
+    d.style.background=`rgb(${Math.round(40+215*s.ch[0]/100)},${Math.round(40+215*s.ch[1]/100)},${Math.round(60+195*s.ch[2]/100)})`;
+    tl.append(d);
+  });
+}
+function addSlot(){
+  if(adv.length>=8){toast("The lights hold at most 8 periods",true);return;}
+  // A new period starts where the last one ends and lasts up to 2 hours (never past midnight).
+  const l=adv[adv.length-1],start=l?toMin(l.end):480;
+  if(start>=1440){toast("The last period already runs to midnight — set its end earlier first",true);return;}
+  const end=Math.min(1440,start+120);
+  adv.push({start:fmt(start),end:end===1440?"24:00":fmt(end),ch:l?[...l.ch]:[50,50,50,50]});renderAdv();
+}
+function sendAdvanced(){
+  for(const s of adv){if(!/^\d\d:\d\d$/.test(s.start)||!/^\d\d:\d\d$/.test(s.end)||toMin(s.end)<=toMin(s.start)||toMin(s.end)>1440){toast(`Check times ${t12(s.start)}–${t12(s.end)} (end must be after start)`,true);return;}}
+  const sorted=[...adv].sort((a,b)=>toMin(a.start)-toMin(b.start));
+  for(let i=1;i<sorted.length;i++)if(toMin(sorted[i].start)<toMin(sorted[i-1].end)){toast("Periods overlap",true);return;}
+  if(!confirm(`Switch ${forLabel().slice(2)} to advanced mode with these periods? The daily timer stops until you save it again.`))return;
+  run("Sending advanced schedule",()=>api("/api/advanced",{slots:sorted,targets:targets()}));
+}
+
+/* ---------- lights & status ---------- */
+const MODE_NAME={timer:"Daily Timer",curve:"Smooth Curve",advanced:"Advanced Mode"};
+function lightStatus(l){
+  const o=l.override,t=l.timer;
+  if(o){const m=Math.max(0,Math.round((o.until-Date.now()/1000)/60));
+    return {big:o.on?`Temporary • On${o.preset?" — "+o.preset:""}`:"Temporary • Off",sub:`Back to ${MODE_NAME[l.mode]} in ${m} min`,bulb:o.on?"ov":""};}
+  if(l.mode==="advanced")return {big:"Advanced Mode",sub:"Running its 8-step schedule on the light",bulb:"on"};
+  if(l.mode==="curve"){const p=l.curve.points,first=p[0].t,last=p[p.length-1].t,peak=Math.round(l.curve_peak);
+    const col=l.curve.mode==="per_point"?"day-sim colours":(l.curve.preset||"custom colour");
+    const n=new Date(),nm=n.getHours()*60+n.getMinutes(),c=l.curve_now_ch.map(Math.round);
+    if(nm>=toMin(first)&&nm<=toMin(last))return {big:`Smooth Curve • now ${Math.round(l.curve_now)}% • Peak ${peak}% • Off ${t12(last)}`,
+      sub:`R ${c[0]}% • G ${c[1]}% • B ${c[2]}% • UV ${c[3]}%`,bulb:l.curve_now>0?"on":""};
+    return {big:`Smooth Curve • off now • Peak ${peak}%`,sub:`Starts ${t12(first)} • ${col}`,bulb:""};}
+  const n=new Date(),nm=n.getHours()*60+n.getMinutes(),on=toMin(t.start),off=t.end==="24:00"?1440:toMin(t.end);
+  const inWin=on<off?(nm>=on&&nm<off):(nm>=on||nm<off),col=t.preset||"Custom colour";
+  return inWin?{big:`Daily Timer • ${col} • Off ${t12(t.end)}`,sub:"On now",bulb:"on"}:{big:`Daily Timer • ${col} • On ${t12(t.start)}`,sub:"Off now",bulb:""};
+}
+function renderLights(){
+  const box=$("lights");box.innerHTML="";
+  S.lights.forEach(l=>{
+    const st=lightStatus(l),d=document.createElement("div");d.className="light"+(selected.has(l.mac)?" sel":"");
+    const link=l.last_error?"⚠ "+l.last_error:l.connected?"connected":l.rssi!=null?`in range (${l.rssi} dBm)`:"waiting for first contact";
+    d.innerHTML=`<span class="tools"><button title="Rename" data-act="rename">✎</button><button title="Remove this light" data-act="remove">🗑</button></span><span class="check" title="Tick to edit several lights at once">${selected.has(l.mac)?"✓":""}</span><div style="min-width:0;flex:1"><div class="nm"><span class="bulb ${st.bulb}"></span><span class="n"></span></div><div class="st"></div><div class="sub s1"></div><div class="sub s2"></div></div>`;
+    d.querySelector(".n").textContent=l.name;d.querySelector(".st").textContent=st.big;
+    d.querySelector(".s1").textContent=st.sub;d.querySelector(".s2").textContent=link;
+    if(l.last_error)d.querySelector(".s2").classList.add("warn");
+    if(l.override){const b=document.createElement("button");b.className="back";b.textContent="Back to normal";
+      b.onclick=e=>{e.stopPropagation();run(`${l.name} back to normal`,()=>api("/api/normal",{targets:[l.mac]}),true);};d.lastChild.append(b);}
+    // Tap the card = control just this light. Tap the tick box = add/remove it (edit several at once).
+    d.onclick=()=>{const next=new Set([l.mac]);if(selected.size===1&&selected.has(l.mac))return;setSelection(next);};
+    d.querySelector(".check").onclick=e=>{e.stopPropagation();const next=new Set(selected);
+      if(next.has(l.mac)){if(next.size===1)return;next.delete(l.mac);}else next.add(l.mac);setSelection(next);};
+    d.ondblclick=e=>{e.preventDefault();renameLight(l);};
+    d.querySelector('[data-act="rename"]').onclick=e=>{e.stopPropagation();renameLight(l);};
+    d.querySelector('[data-act="remove"]').onclick=e=>{e.stopPropagation();removeLight(l);};
+    box.append(d);
+  });
+}
+async function renameLight(l){
+  const n=prompt("Name for this light (e.g. the tank it's on)",l.name);if(!n||!n.trim()||n.trim()===l.name)return;
+  try{await api(`/api/lights/${l.mac}/name`,{name:n.trim()});toast("Renamed to "+n.trim());refresh();}catch(e){toast(e.message,true);}
+}
+async function removeLight(l){
+  if(!confirm(`Remove ${l.name} from LuminAqua?
+
+The light keeps running whatever it was last sent. You can add it again any time.`))return;
+  try{await api(`/api/lights/${l.mac}`,null,"DELETE");selected.delete(l.mac);toast(`Removed ${l.name}`);await refresh();
+    if(!selected.size&&S.lights.length)setSelection(new Set([S.lights[0].mac]));}catch(e){toast(e.message,true);}
+}
+
+/* ---------- add lights ---------- */
+function openAdd(){$("addPanel").style.display="";$("empty").style.display="none";doScan();}
+function closeAdd(){$("addPanel").style.display="none";renderLights();}
+async function doScan(){
+  $("rescan").disabled=true;$("scanList").innerHTML="";
+  $("scanNote").textContent="Searching (10–20 seconds)… Lights connected to the official app on a phone won't show up — close the app first.";
+  try{
+    const r=await api("/api/scan?seconds=8"),list=$("scanList");
+    $("scanNote").textContent=r.devices.length?`Found ${r.devices.length}:`:"No Week Aqua lights found. Make sure they're powered, within range of this Pi, and not connected to a phone app, then search again.";
+    r.devices.forEach(d=>{
+      const row=document.createElement("div");row.className="scanrow";
+      row.innerHTML=`<div class="meta"><b></b> <span class="tag ${d.support==="supported"?"ok":"maybe"}">${d.support==="supported"?"Compatible":"Untested"}</span><div></div></div>`;
+      row.querySelector("b").textContent=d.name;
+      row.querySelector(".meta div").textContent=`${d.mac} · signal ${d.rssi} dBm${d.support==="supported"?"":" · a different Week Aqua model family; it may not respond"}`;
+      const b=document.createElement("button");b.className=d.added?"":"primary";b.textContent=d.added?"Added":"Add";b.disabled=d.added;
+      b.onclick=()=>addLight(d.mac,d.name);row.append(b);list.append(row);
+    });
+  }catch(e){$("scanNote").textContent="Search failed: "+e.message;}
+  $("rescan").disabled=false;
+}
+async function addLight(mac,suggest){
+  const n=prompt("Name this light (e.g. the tank it's on)",suggest||"");if(!n||!n.trim())return;
+  if(await run("Adding "+n.trim(),()=>api("/api/lights",{mac,name:n.trim()}),true)){
+    await setSelection(new Set([mac]));doScan();
+  }
+}
+function addManual(){
+  const mac=$("manMac").value.trim().toUpperCase(),name=$("manName").value.trim();
+  if(!/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/.test(mac)){toast("Address looks like AA:BB:CC:DD:EE:FF",true);return;}
+  if(!name){toast("Give it a name",true);return;}
+  run("Adding "+name,()=>api("/api/lights",{mac,name}),true).then(ok=>{if(ok){$("manMac").value=$("manName").value="";setSelection(new Set([mac]));}});
+}
+
+function setSelection(next){
+  if((dirty||cdirty)&&!confirm("You have unsaved schedule changes. Discard them and load the other light's schedule?"))return;
+  selected=next;
+  try{localStorage.setItem("luminaqua.sel",JSON.stringify([...selected]));}catch(e){}
+  renderLights();loadSelected(true);
+}
+
+/* ---------- schedule tabs ---------- */
+let tab="curve";
+function showTab(t){
+  tab=t;
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("sel",b.dataset.tab===t));
+  document.querySelectorAll(".tab").forEach(d=>d.style.display=d.id==="tab-"+t?"":"none");
+  if(t==="curve"&&C)drawCurve();
+}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function renderBadges(){
+  const ls=selLights();
+  document.querySelectorAll("#tabs button").forEach(b=>{
+    const on=ls.filter(l=>l.mode===b.dataset.tab),badge=b.querySelector(".badge");
+    badge.textContent=on.length?"Active":"";
+    if(on.length&&on.length<ls.length){const n=document.createElement("span");n.style.textTransform="none";n.textContent=" · "+on.map(l=>l.name).join(", ");badge.append(n);}
+    badge.style.display=on.length?"":"none";
+  });
+}
+// Several lights selected and they run different things -> warn next to each Save button.
+function renderOverwrite(){
+  const ls=selLights(),names=ls.map(l=>l.name).join(" and ");
+  const differs={
+    curve:ls.some(l=>l.mode!==ls[0].mode||JSON.stringify(cleanCurve(l.curve))!==JSON.stringify(cleanCurve(ls[0].curve))),
+    timer:ls.some(l=>l.mode!==ls[0].mode||!sameTimer(l.timer,ls[0].timer)),
+    advanced:ls.some(l=>l.mode!==ls[0].mode||JSON.stringify(l.advanced)!==JSON.stringify(ls[0].advanced)),
+  };
+  document.querySelectorAll("[data-ow]").forEach(p=>{
+    const show=ls.length>1&&differs[p.dataset.ow];
+    p.textContent=show?`⚠ ${ls.length===2?"Both":"Several"} lights selected — saving will overwrite ${ls.length===2?"both":"all of"} ${names} with this schedule. They currently run different schedules; the editor shows ${ls[0].name}'s.`:"";
+    p.style.display=show?"":"none";
+  });
+}
+// Load the editors from the selected light (the first one, when several are ticked)
+function loadSelected(force){
+  document.querySelectorAll("[data-for]").forEach(e=>e.textContent=forLabel());
+  renderBadges();renderOverwrite();
+  const ls=selLights(),key=ls.map(l=>l.mac).join(",");
+  if(!ls.length)return;
+  const changed=key!==loadedFor;loadedFor=key;const L=ls[0];
+  if(force||changed||!T||(!dirty&&!sameTimer(L.timer,cleanTimer(T)))){
+    T=clone(L.timer);dirty=false;$("dirty").classList.remove("show");renderTimer();
+  } else drawRing();
+  if(force||changed){adv=clone(L.advanced||[]);renderAdv();}
+  if(drag)return;
+  if(force||changed||(!cdirty&&JSON.stringify(cleanCurve(L.curve))!==JSON.stringify(cleanCurve(C)))){
+    C=clone(L.curve);C.mode=C.mode||"single";cdirty=false;$("cdirty").classList.remove("show");
+    if(changed||force||selPt>=C.points.length)selPt=null;renderCurve();
+  } else {renderProfiles();drawCurve();}
+}
+
+async function refresh(first){
+  try{S=await api("/api/state");}catch(e){toast("Can't reach LuminAqua: "+e.message,true);return;}
+  if(first){
+    // Start with ONE light (the tanks run different schedules): the last one used, else the first.
+    let saved=null;try{saved=JSON.parse(localStorage.getItem("luminaqua.sel"));}catch(e){}
+    const macs=S.lights.map(l=>l.mac);
+    selected=new Set(Array.isArray(saved)&&saved.length===1&&macs.includes(saved[0])?saved:macs.slice(0,1));
+  }
+  // drop lights that were removed; with none selected, pick the first
+  selected=new Set([...selected].filter(m=>S.lights.some(l=>l.mac===m)));
+  if(!selected.size&&S.lights.length)selected.add(S.lights[0].mac);
+  const none=!S.lights.length;document.body.classList.toggle("nolights",none);
+  $("empty").style.display=none&&$("addPanel").style.display==="none"?"":"none";
+  $("lightsHint").style.display=S.lights.length>1?"":"none";
+  renderLights();loadSelected(first);
+  if(first&&selLights().length){setSliders(selLights()[0].timer.ch);nowPreset=selLights()[0].timer.preset;showTab("curve");}
+  renderNowColors();
+}
+
+CH.forEach(([lab,col],i)=>{
+  const d=document.createElement("div");d.className="slider";
+  d.innerHTML=`<label style="color:var(${col})">${lab}</label><input id="s${i}" type="range" min="0" max="100" value="50" style="--c:var(${col})"><output id="o${i}">50%</output>`;
+  $("sliders").append(d);
+  d.querySelector("input").oninput=e=>{$("o"+i).textContent=e.target.value+"%";nowPreset=null;renderNowColors();};
+});
+$("master").oninput=e=>$("masterOut").textContent=e.target.value+"%";
+renderDur();
+[["repoLink","repo"],["donateLink","donate"],["fishLink","donate"]].forEach(([id,k])=>{
+  const u=LINKS[k],ok=/^https:\/\/[^<>\s]+$/.test(u||"");
+  if(ok)$(id).href=u;else $(id).closest(k==="donate"?".donate":".row").style.display="none";
+});
+const route=()=>{const a=location.hash==="#about";document.body.classList.toggle("showabout",a);if(a)window.scrollTo(0,0);};
+addEventListener("hashchange",route);route();
+setInterval(()=>{$("clock").textContent=new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true});},1000);
+setInterval(()=>refresh(),10000);
+refresh(true);
+</script>
+</body>
+</html>

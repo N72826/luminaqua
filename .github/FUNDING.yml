@@ -1,0 +1,7 @@
+# Adds a "Sponsor" button to the top of the GitHub repo page.
+# Remove the # in front of the line(s) you use and put in your own name. Docs:
+# https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+ko_fi: luminaqua
+# github: n72826      # only after GitHub Sponsors approves you
+# custom: ["https://paypal.me/your-name"]
