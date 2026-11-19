@@ -44,6 +44,8 @@ LuminAqua turns a Raspberry Pi next to your tanks into a 24/7 controller that dr
 - **📁 Profiles** — save curves like "40g Breeder – Balanced" and swap between them; two low-UV starter templates included.
 - **⏱ Everything the official app does, too** — daily timer with sunrise/sunset fade, all 12 factory colour presets,
   custom colours, the 8-step advanced mode, and temporary "on for 1 hour" overrides.
+- **🔌 Same power limit as the official app** — custom colours can't push the light past its power budget;
+  a meter shows how much of it a colour uses, and sliders stop at 100 %.
 - **🛟 Fail-safe** — the light's own off-timer is always set to the end of your curve, so if the Pi dies or Bluetooth
   drops, the light still switches itself off on time. Weak links get automatic retries and periodic re-sends.
 - **📱 No app, no account, no cloud** — it's a web page served by the Pi. Open it on any phone or computer on your
@@ -70,7 +72,7 @@ LuminAqua speaks the Bluetooth protocol of WEEK AQUA's **"WEK" family** (lights 
 |---|---|
 | ✅ Tested | **B3.0-L900pro**, **P6000pro** |
 | 🟢 Should work | Other WEEK AQUA lights the "+ Add light" search marks **Compatible** |
-| 🟡 Untested | Lights it marks **Untested** (other WEEK AQUA families) — they may not respond |
+| ⚪ Not supported | Devices it marks **Not supported**: other WEEK AQUA families (reef and multi-channel lights, smart plugs and others) use different commands |
 
 Got another model working? Please [open an issue](../../issues) so it can be added to the list.
 

@@ -4,11 +4,14 @@ Worked out for interoperability, from how the official WEEK AQUA app (v3.0.28) t
 and verified on real hardware. Independent work; not affiliated with or endorsed by WEEK AQUA.
 
 Tested on: **B3.0-L900pro** and **P6000pro** (both "WEK" family). Other WEK-family lights are expected
-to work; other families (see below) are untested.
+to work; other families (see below) use different commands and aren't supported.
 
 ## Transport
 - Advertises service `FFF0`; manufacturer data company id `0x4657` (raw bytes `57 46`), which the app
-  reads as family code `5746` = WEK. Other codes: 5745 HJ, 5747–5752 for newer families.
+  reads as family code `5746` = WEK.
+- Other family codes, which the official app drives with different screens and commands: `5745` older HJ
+  series (also the app's fallback for unknown codes), `5747`, `5748`, `5749`, `5751`, `5752` (newer light
+  and device series), `5750` smart plug. LuminAqua lists these as *Not supported*.
 - Write commands (write-without-response) to `0000fff2-…`. `0000fff1` is notify (silent so far).
 - Every command is **8 bytes**; unused bytes are `0x55`.
 - Do **not** touch service `F000FFC0` — that is the firmware-update (OAD) channel.
@@ -52,8 +55,22 @@ The light cannot report its settings back, so a controller must remember them it
 `6C E3 73 EB`, `A7 B9 74 EB`, `79 DF 74 EB`, `C1 5E BC EB`, `EB 5E 94 EB`, `A3 EB 70 00`,
 `77 EB 77 00`, `83 EB 85 00`, `5E EB 5E 00`, `59 EB 60 00`, `6E EB 65 00`, `7E EB 69 00`.
 
+### Power budget
+The app weights each channel by the power its LEDs draw and refuses any custom slider move that would
+take the total over **100 %** (it shows a "maximum" message instead):
+
+`power % = 0.39·R% + 0.41·G% + 0.53·B% + 0.11·UV%`  (all four at 100 % would be 144 %)
+
+The built-in presets sit at 77–102 % on this scale. LuminAqua applies the same limit to custom colours
+(sliders stop at 100 %) and, as a backstop, scales anything it sends above 102 % down proportionally.
+
 ## Smooth curves (LuminAqua)
 The lights can't fade between arbitrary levels on their own. LuminAqua stays in manual mode, sets the
 on-window to the curve's first/last point (so the light still switches itself off if the controller
 dies), and writes `FB F9 R G B UV` once a minute as the curve changes. Live level writes change the
 output smoothly with no blink.
+
+## Thanks
+[ad960009/WeekAquaProject](https://github.com/ad960009/WeekAquaProject), an independent Windows and
+Home Assistant controller for WEEK AQUA lights, pointed us to the app's power limit and family codes;
+the values above were then checked against the official app itself.

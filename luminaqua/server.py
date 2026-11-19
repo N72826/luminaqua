@@ -52,8 +52,8 @@ def _pt(t, pct, ch):
 
 # Built-in starters (per-point colour): warm, UV-free sunrise/sunset into a low-UV daylight peak.
 WARM = [75, 45, 18, 0]
-DAYLIGHT = [70, 85, 80, 28]     # x 65% peak -> UV ~18% effective
-CRISP = [55, 72, 88, 34]        # x 50% peak -> UV ~17% effective
+DAYLIGHT = [65, 79, 74, 26]     # 99.8% of the power budget; x 65% peak -> UV ~17% effective
+CRISP = [54, 71, 86, 34]        # 99.5% of the power budget; x 50% peak -> UV ~17% effective
 CURVE_TEMPLATES = {
     "Balanced High-Tech ~65% Peak": {"mode": "per_point", "preset": None, "ch": DAYLIGHT, "points": [
         _pt("11:00", 0, WARM), _pt("12:00", 25, WARM), _pt("13:30", 65, DAYLIGHT),
@@ -526,6 +526,7 @@ def get_state():
         "lights": lights, "presets": STATE["presets"],
         "app_presets": {k: P.raw_to_pct(v) for k, v in P.APP_PRESETS.items()},
         "app_presets_raw": {k: list(v) for k, v in P.APP_PRESETS.items()}, "max_level": P.MAX_LEVEL,
+        "power_weights": list(P.POWER_WEIGHTS), "max_power": P.MAX_POWER,
         "curve_templates": CURVE_TEMPLATES, "curve_profiles": STATE["curve_profiles"],
         "ramp_hours": P.RAMP_HOURS, "now": time.time(),
     }
@@ -627,14 +628,19 @@ def delete_preset(name: str):
     return STATE["presets"]
 
 
-WEK_COMPANY_ID = 0x4657   # advert manufacturer id (raw bytes 57 46) of the lights this protocol drives
-OTHER_WEEK_IDS = {0x4557, 0x4757, 0x4857, 0x4957, 0x5057, 0x5157, 0x5257}  # other Week Aqua families
+WEK_COMPANY_ID = 0x4657   # advert manufacturer id (raw bytes 57 46, "WF") of the lights this protocol drives
+# Other Week Aqua product families, by advert id (raw bytes 57 xx). The official app drives each with a
+# different screen and command set, so LuminAqua can't control them (yet).
+OTHER_WEEK_IDS = {
+    0x4557: "older HJ-series light", 0x4757: "4-series light", 0x4857: "5-series light",
+    0x4957: "6-series light", 0x5057: "smart plug", 0x5157: "8-series device", 0x5257: "9-series light",
+}
 
 
 @app.get("/api/scan")
 async def scan(seconds: float = 8):
-    """Look for nearby lights. Compatible (WEK family) ones first; other Week Aqua families are listed
-    as untested. A light that is connected to a phone app does not show up until the app lets go."""
+    """Look for nearby lights. Compatible (WEK family) ones first; other Week Aqua products are listed
+    as not supported. A light that is connected to a phone app does not show up until the app lets go."""
     seconds = max(3.0, min(20.0, seconds))
     for L in list(LIGHTS.values()):          # our own links stop lights advertising
         if not L.lock.locked():
@@ -645,17 +651,18 @@ async def scan(seconds: float = 8):
     out = []
     for addr, (dev, adv) in found.items():
         ids = set((adv.manufacturer_data or {}).keys())
+        kind = None
         if WEK_COMPANY_ID in ids:
             support = "supported"
-        elif ids & OTHER_WEEK_IDS:
-            support = "untested"
+        elif ids & OTHER_WEEK_IDS.keys():
+            support, kind = "unsupported", OTHER_WEEK_IDS[min(ids & OTHER_WEEK_IDS.keys())]
         else:
             continue
         mac = addr.upper()
         if mac in LIGHTS:
             LIGHTS[mac].rssi, LIGHTS[mac].last_seen = adv.rssi, time.time()
         out.append({"mac": mac, "name": adv.local_name or dev.name or "Week Aqua light", "rssi": adv.rssi,
-                    "support": support, "added": mac in LIGHTS})
+                    "support": support, "kind": kind, "added": mac in LIGHTS})
     out.sort(key=lambda d: (d["support"] != "supported", -(d["rssi"] or -999)))
     return {"devices": out}
 

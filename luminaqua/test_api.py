@@ -280,6 +280,27 @@ except RuntimeError as e:
     assert "weak signal" in str(e) and tl2.last_error == "weak signal"
 
 assert c.get("/").status_code == 200
+
+# ---- power budget (official app: R .39, G .41, B .53, UV .11; custom colours max 100 %)
+import protocol as PP
+for name in PP.APP_PRESETS:                      # factory presets are sent byte-exact, untouched
+    assert PP.preset_raw(name) == PP.color_cmd([0, 0, 0, 0], name)
+    assert PP.power_pct(PP.raw_to_pct(PP.APP_PRESETS[name])) <= 102.5, name
+full = PP.levels([100, 100, 100, 100])           # 144 % asked for -> scaled down, colour kept
+assert PP.power_pct([b / 235 * 100 for b in full[2:6]]) <= PP.POWER_LIMIT
+assert full[2] == full[3] == full[4] == full[5] and full[2] < 235
+assert PP.levels([46, 97, 49, 80])[2:6] == bytes(PP.level(x) for x in [46, 97, 49, 80])   # in budget: unchanged
+assert PP.levels([50, 50, 50, 50])[2:6] == bytes([118] * 4)
+hot = {"mode": "single", "preset": None, "ch": [100, 100, 100, 100],
+       "points": [{"t": "10:00", "pct": 100}, {"t": "12:00", "pct": 100}]}
+assert PP.power_pct([b / 235 * 100 for b in PP.curve_raw(hot, 660)]) <= PP.POWER_LIMIT
+assert PP.power_pct([b / 235 * 100 for b in PP.raw_levels((235, 235, 235, 235))[2:6]]) <= PP.POWER_LIMIT
+st = c.get("/api/state").json()
+assert st["power_weights"] == [0.39, 0.41, 0.53, 0.11] and st["max_power"] == 100
+for name, tpl in st["curve_templates"].items():   # starter templates fit the budget at 100 %
+    for pt in tpl["points"]:
+        if pt.get("ch"):
+            assert PP.power_pct(pt["ch"]) <= 100, (name, pt)
 for icon in ("/favicon.png", "/apple-touch-icon.png", "/icon-192.png", "/favicon.ico"):
     r = c.get(icon); assert r.status_code == 200 and r.headers["content-type"] == "image/png", icon
 assert c.get("/server.png").status_code == 404 and c.get("/state.png").status_code == 404

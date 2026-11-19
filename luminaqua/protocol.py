@@ -26,6 +26,36 @@ def _hm(t: str) -> tuple[int, int]:
     return _bcd(h), _bcd(m)
 
 
+# Power budget. The official app weights each channel by how much power its LEDs draw and won't let
+# a custom colour's weighted total go over 100 %. LuminAqua lets you set any mix and, when it's over,
+# dims all channels evenly so what's sent fits. Factory presets (77-102 %) are sent byte-exact.
+POWER_WEIGHTS = (0.39, 0.41, 0.53, 0.11)   # R, G, B, UV
+MAX_POWER = 100.0
+POWER_LIMIT = MAX_POWER
+
+
+def power_pct(ch) -> float:
+    """Weighted power of channel percentages (0-100 each), as % of the light's budget."""
+    return sum(w * float(c) for w, c in zip(POWER_WEIGHTS, ch))
+
+
+def cap_pct(ch, limit: float = POWER_LIMIT) -> list[float]:
+    """Scale all channels down by the same factor so the mix fits the power budget (colour kept)."""
+    ch = [max(0.0, min(100.0, float(c))) for c in ch]
+    p = power_pct(ch)
+    if p <= limit:
+        return ch
+    f = limit / p * 0.999
+    return [c * f for c in ch]
+
+
+def cap_raw(raw, limit: float = POWER_LIMIT) -> tuple[int, ...]:
+    pct = [r / MAX_LEVEL * 100 for r in raw]
+    if power_pct(pct) <= limit:
+        return tuple(int(r) for r in raw)
+    return tuple(int(c / 100 * MAX_LEVEL) for c in cap_pct(pct, limit))   # round down: stay under
+
+
 def level(pct: float) -> int:
     return round(max(0.0, min(100.0, float(pct))) / 100 * MAX_LEVEL)
 
@@ -49,7 +79,7 @@ def mode_auto() -> bytes:
 
 def levels(ch: list[float], slot: int = 9) -> bytes:
     """slot 9 = live manual levels; 1-8 = schedule slot."""
-    r, g, b, uv = (level(x) for x in ch)
+    r, g, b, uv = cap_raw([level(x) for x in ch])
     return _cmd(0xFB, 0xF0 | slot, r, g, b, uv)
 
 
@@ -186,8 +216,8 @@ def curve_raw(curve: dict, minute: float) -> tuple[int, int, int, int]:
         if ms[i] <= minute <= ms[i + 1]:
             a, b = anchor_raw(curve, pts[i]), anchor_raw(curve, pts[i + 1])
             f = 0.0 if ms[i + 1] == ms[i] else (minute - ms[i]) / (ms[i + 1] - ms[i])
-            return tuple(round(x + (y - x) * f) for x, y in zip(a, b))
-    return tuple(round(x) for x in anchor_raw(curve, pts[-1]))
+            return cap_raw([round(x + (y - x) * f) for x, y in zip(a, b)])
+    return cap_raw([round(x) for x in anchor_raw(curve, pts[-1])])
 
 
 def raw_pct(raw) -> list[float]:
@@ -196,7 +226,7 @@ def raw_pct(raw) -> list[float]:
 
 
 def raw_levels(raw) -> bytes:
-    return _cmd(0xFB, 0xF9, *raw)
+    return _cmd(0xFB, 0xF9, *cap_raw(raw))
 
 
 def curve_window(curve: dict) -> tuple[str, str]:

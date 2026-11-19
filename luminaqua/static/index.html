@@ -127,7 +127,7 @@ th{font-size:11px;color:var(--dim);font-weight:600;text-align:center;padding:0 3
 .scanrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .scanrow .meta{flex:1;min-width:0}.scanrow .meta div{font-size:12px;color:var(--dim)}
 .tag{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:999px;padding:1px 7px;border:1px solid}
-.tag.ok{color:var(--ok);border-color:rgba(92,207,134,.5)}.tag.maybe{color:var(--warn);border-color:rgba(240,181,74,.5)}
+.tag.ok{color:var(--ok);border-color:rgba(92,207,134,.5)}.tag.maybe{color:var(--warn);border-color:rgba(240,181,74,.5)}.tag.no{color:var(--dim);border-color:var(--line)}
 input.txt{background:#0e2131;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;min-width:0}
 body.nolights main>section.card:not(#lightsCard){display:none}
 .home{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
@@ -149,6 +149,12 @@ body.showabout #aboutLink{display:none}
 a.btn{display:inline-block;text-decoration:none;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-weight:600}
 a.btn.primary{background:var(--accent2);border-color:var(--accent);color:#fff}
 a.btn:hover{border-color:var(--accent)}
+.pmeter{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--dim)}
+.pmeter .pbar{height:6px;border-radius:99px;background:#0e2131;border:1px solid var(--line);overflow:hidden}
+.pmeter .pbar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .15s}
+.pmeter b{font-weight:650;color:var(--text);font-variant-numeric:tabular-nums}
+.pmeter.max .pbar i{background:var(--warn)}.pmeter.max b{color:var(--warn)}
+.pmeter .pnote{grid-column:1/-1;color:var(--warn);font-size:12px}
 .donate{margin-top:18px;padding:14px;border-radius:12px;border:1px solid rgba(63,193,201,.45);background:linear-gradient(135deg,rgba(63,193,201,.10),rgba(178,108,255,.08))}
 .donate h3{margin-top:0;color:var(--text)}
 .donate::after{content:"";display:block;clear:both}
@@ -311,6 +317,7 @@ tr.selpt td{background:#17405a}
     <div class="chips" id="nowColors"></div>
     <div id="sliders" style="margin-top:10px"></div>
     <div class="slider"><label>All</label><input id="master" type="range" min="0" max="100" value="100" style="--c:#fff"><output id="masterOut">100%</output></div>
+    <div id="nowPower"></div>
     <h3>For</h3>
     <div class="seg" id="dur"></div>
     <div class="row" style="margin-top:12px">
@@ -446,7 +453,7 @@ function curveRawAt(m){
 function curveAt(m){const p=C.points.map(q=>[toMin(q.t),+q.pct]);if(m<p[0][0]||m>p[p.length-1][0])return 0;
   for(let i=1;i<p.length;i++)if(m<=p[i][0])return p[i][0]===p[i-1][0]?p[i][1]:p[i-1][1]+(p[i][1]-p[i-1][1])*(m-p[i-1][0])/(p[i][0]-p[i-1][0]);return 0;}
 const rawPct=r=>r.map(v=>Math.round(v/ML()*100));
-const chText=pc=>`<span class="r">R ${pc[0]}%</span> • <span class="g">G ${pc[1]}%</span> • <span class="b">B ${pc[2]}%</span> • <span class="uv">UV ${pc[3]}%</span>`;
+const chText=pc=>`<span class="r">R ${pc[0]}%</span> • <span class="g">G ${pc[1]}%</span> • <span class="b">B ${pc[2]}%</span> • <span class="uv">UV ${pc[3]}%</span> · power ${Math.min(100,Math.round(powerOf(pc)))}%`;
 const rgbOf=ch=>`rgb(${Math.round(60+195*ch[0]/100)},${Math.round(60+195*ch[1]/100)},${Math.round(80+175*ch[2]/100)})`;
 const colorPctOf=(preset,ch)=>preset&&S.app_presets[preset]?S.app_presets[preset]:ch;
 const pointRGB=p=>rgbOf(pp()&&p.ch?colorPctOf(p.preset,p.ch):colorPctOf(C.preset,C.ch));
@@ -455,6 +462,22 @@ function cleanCurve(c){return {mode:c.mode||"single",preset:c.preset||null,ch:c.
 function cMarkDirty(){cdirty=true;$("cdirty").classList.add("show");drawCurve();}
 
 /* colour picker: stock presets, saved presets, and Custom (R/G/B/UV sliders). obj = {preset, ch} */
+/* power budget: the official app weights each channel by the power its LEDs draw and keeps custom
+   colours at or under 100 %. Here the sliders move freely; a mix over the limit is dimmed evenly when
+   it's sent (the server does the same), and the meter shows exactly what the light gets. */
+const PW=()=>(S&&S.power_weights)||[.39,.41,.53,.11];
+const powerOf=ch=>ch.reduce((a,c,i)=>a+PW()[i]*(+c||0),0);
+const fitPower=ch=>{const p=powerOf(ch);return p>100?ch.map(c=>c*100/p):ch;};
+function powerMeter(el,ch,factory){
+  const p=powerOf(ch),over=!factory&&p>100.5,max=p>=99.5,w=Math.min(100,p);
+  el.className="pmeter"+(max?" max":"");
+  const sent=fitPower(ch).map(c=>Math.floor(c));
+  el.innerHTML=`<span>Light power</span><div class="pbar"><i style="width:${w.toFixed(1)}%"></i></div>`+
+    `<b>${over?Math.round(p)+"% → 100%":max?"100% · max":Math.round(p)+"%"}</b>`+
+    (over?`<div class="pnote">Over the light's power limit, so the whole colour is dimmed evenly to fit: `+
+      `<span class="r">R ${sent[0]}%</span> · <span class="g">G ${sent[1]}%</span> · <span class="b">B ${sent[2]}%</span> · <span class="uv">UV ${sent[3]}%</span></div>`:"");
+}
+
 function colorPicker(box,obj,onchange){
   box.innerHTML="";
   const chips=document.createElement("div");chips.className="chips";
@@ -467,15 +490,18 @@ function colorPicker(box,obj,onchange){
   });
   chips.append(chip("Custom",obj.ch,{sel:!matched,onclick:()=>{obj.preset=null;obj._custom=true;colorPicker(box,obj,onchange);}}));
   box.append(chips);
-  if(matched)return;
+  const pm=document.createElement("div");powerMeter(pm,obj.ch,matched&&!!obj.preset);
+  if(matched){box.append(pm);return;}
   const sl=document.createElement("div");sl.style.marginTop="8px";
   CH.forEach(([lab,col],i)=>{
     const d=document.createElement("div");d.className="slider";
     d.innerHTML=`<label style="color:var(${col})">${lab}</label><input type="range" min="0" max="100" value="${Math.round(obj.ch[i])}" style="--c:var(${col})"><output>${Math.round(obj.ch[i])}%</output>`;
-    d.querySelector("input").oninput=e=>{obj.ch[i]=+e.target.value;obj.preset=null;obj._custom=true;d.querySelector("output").textContent=e.target.value+"%";onchange();};
+    d.querySelector("input").oninput=e=>{
+      const v=+e.target.value;obj.ch[i]=v;obj.preset=null;obj._custom=true;d.querySelector("output").textContent=v+"%";
+      powerMeter(pm,obj.ch);onchange();};
     sl.append(d);
   });
-  box.append(sl);
+  box.append(sl,pm);
 }
 
 /* graph */
@@ -645,10 +671,12 @@ async function saveCurve(){
 
 /* ---------- right now ---------- */
 function sliderVals(){const m=+$("master").value/100;return CH.map((_,i)=>Math.round(+$("s"+i).value*m));}
-function setSliders(ch){$("master").value=100;$("masterOut").textContent="100%";ch.forEach((v,i)=>{$("s"+i).value=v;$("o"+i).textContent=v+"%";});}
+function setSliders(ch){$("master").value=100;$("masterOut").textContent="100%";ch.forEach((v,i)=>{$("s"+i).value=v;$("o"+i).textContent=v+"%";});nowPower();}
+const nowCh=()=>CH.map((_,i)=>+$("s"+i).value);
+function nowPower(){const m=+$("master").value/100;powerMeter($("nowPower"),nowCh().map(v=>v*m),!!nowPreset&&m===1);}
 function renderNowColors(){
   const box=$("nowColors");box.innerHTML="";
-  allColors().forEach(({n,c,factory})=>box.append(chip(n,c,{sel:nowPreset===n,del:false,onclick:()=>{setSliders(c);nowPreset=factory?n:null;renderNowColors();}})));
+  allColors().forEach(({n,c,factory})=>box.append(chip(n,c,{sel:nowPreset===n,del:false,onclick:()=>{setSliders(c);nowPreset=factory?n:null;renderNowColors();nowPower();}})));
 }
 function renderDur(){const b=$("dur");b.innerHTML="";DUR.forEach(([m,l])=>{const x=document.createElement("button");x.textContent=l;if(m===dur)x.className="sel";x.onclick=()=>{dur=m;renderDur();};b.append(x);});}
 function ovr(on){
@@ -668,8 +696,12 @@ function renderAdv(){
     d.innerHTML=`<div class="prow"><label>Start<input type="time" step="300" value="${s.start}" data-k="start"></label>`+
       `<label>End<input type="time" step="300" value="${s.end==="24:00"?"00:00":s.end}" data-k="end"></label>`+
       `<button class="danger del" title="Remove period">×</button></div>`+
-      `<div class="prow ch">`+s.ch.map((v,c)=>`<label style="color:var(${CH[c][1]})">${CH[c][0]} %<input type="number" inputmode="numeric" min="0" max="100" value="${v}" data-c="${c}"></label>`).join("")+`</div>`;
-    d.querySelectorAll("input").forEach(inp=>inp.oninput=()=>{if(inp.dataset.k)s[inp.dataset.k]=(inp.dataset.k==="end"&&inp.value==="00:00")?"24:00":inp.value;else s.ch[+inp.dataset.c]=Math.max(0,Math.min(100,+inp.value||0));drawTimeline();});
+      `<div class="prow ch">`+s.ch.map((v,c)=>`<label style="color:var(${CH[c][1]})">${CH[c][0]} %<input type="number" inputmode="numeric" min="0" max="100" value="${v}" data-c="${c}"></label>`).join("")+`</div><div class="pm"></div>`;
+    const pm=d.querySelector(".pm");powerMeter(pm,s.ch);
+    d.querySelectorAll("input").forEach(inp=>inp.oninput=()=>{
+      if(inp.dataset.k){s[inp.dataset.k]=(inp.dataset.k==="end"&&inp.value==="00:00")?"24:00":inp.value;}
+      else{s.ch[+inp.dataset.c]=Math.max(0,Math.min(100,+inp.value||0));powerMeter(pm,s.ch);}
+      drawTimeline();});
     d.querySelector("button").onclick=()=>{adv.splice(i,1);renderAdv();};
     box.append(d);
   });
@@ -769,10 +801,11 @@ async function doScan(){
     $("scanNote").textContent=r.devices.length?`Found ${r.devices.length}:`:"No Week Aqua lights found. Make sure they're powered, within range of this Pi, and not connected to a phone app, then search again.";
     r.devices.forEach(d=>{
       const row=document.createElement("div");row.className="scanrow";
-      row.innerHTML=`<div class="meta"><b></b> <span class="tag ${d.support==="supported"?"ok":"maybe"}">${d.support==="supported"?"Compatible":"Untested"}</span><div></div></div>`;
+      const ok=d.support==="supported";
+      row.innerHTML=`<div class="meta"><b></b> <span class="tag ${ok?"ok":"no"}">${ok?"Compatible":"Not supported"}</span><div></div></div>`;
       row.querySelector("b").textContent=d.name;
-      row.querySelector(".meta div").textContent=`${d.mac} · signal ${d.rssi} dBm${d.support==="supported"?"":" · a different Week Aqua model family; it may not respond"}`;
-      const b=document.createElement("button");b.className=d.added?"":"primary";b.textContent=d.added?"Added":"Add";b.disabled=d.added;
+      row.querySelector(".meta div").textContent=ok?`${d.mac} · signal ${d.rssi} dBm`:`${d.mac} · a Week Aqua ${d.kind||"device"} that uses different commands, so LuminAqua can't control it yet`;
+      const b=document.createElement("button");b.className=d.added||!ok?"":"primary";b.textContent=d.added?"Added":ok?"Add":"Can't add";b.disabled=d.added||!ok;
       b.onclick=()=>addLight(d.mac,d.name);row.append(b);list.append(row);
     });
   }catch(e){$("scanNote").textContent="Search failed: "+e.message;}
@@ -871,10 +904,10 @@ CH.forEach(([lab,col],i)=>{
   const d=document.createElement("div");d.className="slider";
   d.innerHTML=`<label style="color:var(${col})">${lab}</label><input id="s${i}" type="range" min="0" max="100" value="50" style="--c:var(${col})"><output id="o${i}">50%</output>`;
   $("sliders").append(d);
-  d.querySelector("input").oninput=e=>{$("o"+i).textContent=e.target.value+"%";nowPreset=null;renderNowColors();};
+  d.querySelector("input").oninput=e=>{$("o"+i).textContent=e.target.value+"%";nowPreset=null;renderNowColors();nowPower();};
 });
-$("master").oninput=e=>$("masterOut").textContent=e.target.value+"%";
-renderDur();
+$("master").oninput=e=>{$("masterOut").textContent=e.target.value+"%";nowPower();};
+renderDur();nowPower();
 [["repoLink","repo"],["donateLink","donate"],["fishLink","donate"]].forEach(([id,k])=>{
   const u=LINKS[k],ok=/^https:\/\/[^<>\s]+$/.test(u||"");
   if(ok)$(id).href=u;else $(id).closest(k==="donate"?".donate":".row").style.display="none";
