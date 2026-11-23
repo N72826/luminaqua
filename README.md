@@ -6,7 +6,7 @@
 
 **A better, local, Fluval-style controller for WEEK AQUA Bluetooth aquarium lights — running on a Raspberry Pi.**
 
-Smooth sunrise-to-sunset curves · per-point colour "day sim" · every light on one page, alone or all at once · works from any phone or PC on your Wi-Fi
+Smooth sunrise-to-sunset curves · per-point color "day sim" · every light on one page, alone or all at once · works from any phone or PC on your Wi-Fi
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-3fc1c9.svg)](LICENSE)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB.svg?logo=python&logoColor=white)
@@ -25,7 +25,7 @@ Smooth sunrise-to-sunset curves · per-point colour "day sim" · every light on 
 
 ## Why
 
-The official WEEK AQUA app can only do two things: switch a light on/off at fixed times with one colour, or run
+The official WEEK AQUA app can only do two things: switch a light on/off at fixed times with one color, or run
 an 8-step schedule where the light **jumps** between levels. There's no gradual ramp you can shape, no per-tank
 memory on your phone, and only one phone can be connected at a time.
 
@@ -37,15 +37,16 @@ LuminAqua turns a Raspberry Pi next to your tanks into a 24/7 controller that dr
   card to change just that tank, or tick several and control them **all at once**: lights up for feeding, the same
   curve on every tank, or everything off with one tap. Each tank still keeps its own schedule, and LuminAqua warns you
   before you overwrite tanks that run different ones.
-- **🎨 Per-point colour ("day sim")** — give each point its own colour: a warm, UV-free sunrise that morphs into
+- **🎨 Per-point color ("day sim")** — give each point its own color: a warm, UV-free sunrise that morphs into
   crisp midday daylight and back. R, G, B and UV are each interpolated independently.
 - **🔢 Exact readouts** — see the precise R/G/B/UV output now, at every point, and at the peak (great for keeping UV in check).
 - **👁 Preview any point** on the real tank for 60 seconds, then it returns to the live curve automatically.
 - **📁 Profiles** — save curves like "40g Breeder – Balanced" and swap between them; two low-UV starter templates included.
-- **⏱ Everything the official app does, too** — daily timer with sunrise/sunset fade, all 12 factory colour presets,
-  custom colours, the 8-step advanced mode, and temporary "on for 1 hour" overrides.
-- **🔌 Same power limit as the official app** — custom colours can't push the light past its power budget;
-  a meter shows how much of it a colour uses, and sliders stop at 100 %.
+- **⏱ Everything the official app does, too** — daily timer with sunrise/sunset fade, all 12 factory color presets,
+  custom colors, the 8-step advanced mode, and temporary "on for 1 hour" overrides.
+- **🔌 Same power limit as the official app** — custom colors can't push the light past its power budget.
+  Sliders move freely; a meter shows how much of the budget a color uses, and anything over 100 % is dimmed
+  evenly to fit when it's sent.
 - **🛟 Fail-safe** — the light's own off-timer is always set to the end of your curve, so if the Pi dies or Bluetooth
   drops, the light still switches itself off on time. Weak links get automatic retries and periodic re-sends.
 - **📱 No app, no account, no cloud** — it's a web page served by the Pi. Open it on any phone or computer on your
@@ -53,7 +54,7 @@ LuminAqua turns a Raspberry Pi next to your tanks into a 24/7 controller that dr
 
 <table>
 <tr>
-<td width="44%"><img src="docs/day-curve.jpg" alt="Smooth Day Curve editor with per-point colours and live R/G/B/UV readouts"></td>
+<td width="44%"><img src="docs/day-curve.jpg" alt="Smooth Day Curve editor with per-point colors and live R/G/B/UV readouts"></td>
 <td width="28%"><img src="docs/mobile.jpg" alt="LuminAqua on a phone"></td>
 <td width="28%"><img src="docs/add-light.jpg" alt="Adding a light: LuminAqua scans for nearby lights"></td>
 </tr>
@@ -110,10 +111,10 @@ service that starts on boot. Re-run it any time to update (`git pull` first).
 
 | Tab | What it does | Who runs it |
 |---|---|---|
-| **Smooth Day Curve** | Your drawn curve, glided minute by minute. Single colour, or per-point colours. | LuminAqua (the light holds the current level and its own off-time as a fail-safe) |
-| **Daily Timer** | The official app's "Mode setting": one colour, on/off times, optional 0.5–2.5 h fade. | The light itself |
+| **Smooth Day Curve** | Your drawn curve, glided minute by minute. Single color, or per-point colors. | LuminAqua (the light holds the current level and its own off-time as a fail-safe) |
+| **Daily Timer** | The official app's "Mode setting": one color, on/off times, optional 0.5–2.5 h fade. | The light itself |
 | **Advanced (8-Step)** | The official app's "Advanced setting": up to 8 fixed periods. | The light itself |
-| **Right now (temporary)** | On/off or any colour for 15 min – 4 h, then back to the schedule automatically. | LuminAqua |
+| **Right now (temporary)** | On/off or any color for 15 min – 4 h, then back to the schedule automatically. | LuminAqua |
 
 The green **ACTIVE** badge shows which schedule the selected light is running. Tap a light card to edit just
 that light; tick the boxes on several cards to edit them together.

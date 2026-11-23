@@ -207,12 +207,12 @@ assert c.post("/api/curve", json={**CURVE, "points": [{"t": "11:00", "pct": 0}, 
 c.post("/api/timer", json={**TIMER, "targets": [L900]})
 assert light(L900)["mode"] == "timer"
 
-# --- custom colour (single mode): effective = colour x brightness ---------------------------
+# --- custom color (single mode): effective = color x brightness ---------------------------
 CUSTOM = {"mode": "single", "preset": None, "ch": [80, 60, 40, 20], "points": [
     {"t": "10:00", "pct": 0}, {"t": "12:00", "pct": 50}, {"t": "14:00", "pct": 50}]}
 assert P.curve_raw(CUSTOM, 13 * 60) == tuple(round(P.level(v) * .5) for v in [80, 60, 40, 20])
 
-# --- per-point colour: each channel interpolated separately between effective anchors -------
+# --- per-point color: each channel interpolated separately between effective anchors -------
 WARM, DAY = [80, 40, 10, 0], [60, 80, 80, 30]
 PER = {"mode": "per_point", "preset": None, "ch": DAY, "points": [
     {"t": "10:00", "pct": 0, "ch": WARM}, {"t": "11:00", "pct": 40, "ch": WARM},
@@ -221,7 +221,7 @@ a = [P.level(v) * .4 for v in WARM]; b = [P.level(v) * .6 for v in DAY]
 assert P.curve_raw(PER, 12 * 60) == tuple(round((x + y) / 2) for x, y in zip(a, b))   # halfway 11:00-13:00
 assert P.curve_raw(PER, 11 * 60)[3] == 0                                              # warm sunrise: no UV
 assert P.curve_raw(PER, 13 * 60)[3] == round(P.level(30) * .6)                        # UV at the peak
-# a point without its own colour falls back to the curve colour; single mode ignores point colours
+# a point without its own color falls back to the curve color; single mode ignores point colors
 assert P.point_color({**PER, "points": []}, {"t": "12:00", "pct": 50}) == tuple(P.level(v) for v in DAY)
 assert P.point_color({**PER, "mode": "single"}, PER["points"][0]) == tuple(P.level(v) for v in DAY)
 # factory preset on a point stays byte-exact
@@ -281,12 +281,12 @@ except RuntimeError as e:
 
 assert c.get("/").status_code == 200
 
-# ---- power budget (official app: R .39, G .41, B .53, UV .11; custom colours max 100 %)
+# ---- power budget (official app: R .39, G .41, B .53, UV .11; custom colors max 100 %)
 import protocol as PP
 for name in PP.APP_PRESETS:                      # factory presets are sent byte-exact, untouched
     assert PP.preset_raw(name) == PP.color_cmd([0, 0, 0, 0], name)
     assert PP.power_pct(PP.raw_to_pct(PP.APP_PRESETS[name])) <= 102.5, name
-full = PP.levels([100, 100, 100, 100])           # 144 % asked for -> scaled down, colour kept
+full = PP.levels([100, 100, 100, 100])           # 144 % asked for -> scaled down, color kept
 assert PP.power_pct([b / 235 * 100 for b in full[2:6]]) <= PP.POWER_LIMIT
 assert full[2] == full[3] == full[4] == full[5] and full[2] < 235
 assert PP.levels([46, 97, 49, 80])[2:6] == bytes(PP.level(x) for x in [46, 97, 49, 80])   # in budget: unchanged

@@ -261,11 +261,11 @@ tr.selpt td{background:#17405a}
       <div class="readout" id="cnow"></div>
       <div class="pointbox" id="cpoint" style="display:none"></div>
       <table class="pts" style="margin-top:8px">
-        <thead><tr><th style="width:44%">Time</th><th>Brightness %</th><th class="ppcol" style="width:52px">Colour</th><th style="width:50px"></th></tr></thead>
+        <thead><tr><th style="width:44%">Time</th><th>Brightness %</th><th class="ppcol" style="width:52px">Color</th><th style="width:50px"></th></tr></thead>
         <tbody id="cpts"></tbody>
       </table>
       <div class="row" style="margin-top:8px"><button onclick="addPoint()">+ Add point</button></div>
-      <div id="singleColor"><h3>Colour</h3><div id="curveColors"></div></div>
+      <div id="singleColor"><h3>Color</h3><div id="curveColors"></div></div>
       <p class="ow" data-ow="curve"></p>
       <div class="row" style="margin-top:10px">
         <button class="primary grow" onclick="saveCurve()">Save &amp; run smooth curve</button>
@@ -288,7 +288,7 @@ tr.selpt td{background:#17405a}
           <div class="seg" id="ramp"></div>
         </div>
       </div>
-      <h3>Colour</h3>
+      <h3>Color</h3>
       <div id="timerColors"></div>
       <p class="ow" data-ow="timer"></p>
       <div class="row" style="margin-top:10px">
@@ -427,7 +427,7 @@ async function saveTimer(){
   if(await run("Saving daily timer",()=>api("/api/timer",{...cleanTimer(T),targets:targets()}))) $("dirty").classList.remove("show");
   else dirty=wasDirty;
 }
-function useForTimer(){T.ch=sliderVals();T.preset=nowPreset;delete T._custom;markDirty();renderTimerColors();showTab("timer");$("tabs").scrollIntoView({behavior:"smooth",block:"start"});toast("Daily colour changed — press Save daily timer");}
+function useForTimer(){T.ch=sliderVals();T.preset=nowPreset;delete T._custom;markDirty();renderTimerColors();showTab("timer");$("tabs").scrollIntoView({behavior:"smooth",block:"start"});toast("Daily color changed — press Save daily timer");}
 
 /* ---------- smooth curve ---------- */
 let C=null, cdirty=false, cView=null, drag=null, selPt=null;
@@ -438,7 +438,7 @@ window.addEventListener("resize",()=>{if(C&&!drag)drawCurve();});
 const ML=()=>S.max_level||235;
 const clone=o=>JSON.parse(JSON.stringify(o));
 const pp=()=>C.mode==="per_point";
-// Same maths as the Pi (protocol.curve_raw): colour x brightness at each point, channels interpolated separately.
+// Same maths as the Pi (protocol.curve_raw): color x brightness at each point, channels interpolated separately.
 const colorRaw=(preset,ch)=>preset&&S.app_presets_raw[preset]?S.app_presets_raw[preset]:ch.map(v=>Math.round(Math.max(0,Math.min(100,v))/100*ML()));
 const pointColor=p=>pp()&&p.ch?colorRaw(p.preset,p.ch):colorRaw(C.preset,C.ch);
 const anchorRaw=p=>pointColor(p).map(v=>v*(+p.pct)/100);
@@ -461,9 +461,9 @@ function cleanCurve(c){return {mode:c.mode||"single",preset:c.preset||null,ch:c.
   points:c.points.map(p=>({t:p.t,pct:+p.pct,preset:p.preset||null,ch:p.ch?p.ch.map(Number):null}))};}
 function cMarkDirty(){cdirty=true;$("cdirty").classList.add("show");drawCurve();}
 
-/* colour picker: stock presets, saved presets, and Custom (R/G/B/UV sliders). obj = {preset, ch} */
+/* color picker: stock presets, saved presets, and Custom (R/G/B/UV sliders). obj = {preset, ch} */
 /* power budget: the official app weights each channel by the power its LEDs draw and keeps custom
-   colours at or under 100 %. Here the sliders move freely; a mix over the limit is dimmed evenly when
+   colors at or under 100 %. Here the sliders move freely; a mix over the limit is dimmed evenly when
    it's sent (the server does the same), and the meter shows exactly what the light gets. */
 const PW=()=>(S&&S.power_weights)||[.39,.41,.53,.11];
 const powerOf=ch=>ch.reduce((a,c,i)=>a+PW()[i]*(+c||0),0);
@@ -474,7 +474,7 @@ function powerMeter(el,ch,factory){
   const sent=fitPower(ch).map(c=>Math.floor(c));
   el.innerHTML=`<span>Light power</span><div class="pbar"><i style="width:${w.toFixed(1)}%"></i></div>`+
     `<b>${over?Math.round(p)+"% → 100%":max?"100% · max":Math.round(p)+"%"}</b>`+
-    (over?`<div class="pnote">Over the light's power limit, so the whole colour is dimmed evenly to fit: `+
+    (over?`<div class="pnote">Over the light's power limit, so the whole color is dimmed evenly to fit: `+
       `<span class="r">R ${sent[0]}%</span> · <span class="g">G ${sent[1]}%</span> · <span class="b">B ${sent[2]}%</span> · <span class="uv">UV ${sent[3]}%</span></div>`:"");
 }
 
@@ -558,7 +558,7 @@ function updateReadouts(){
     head.innerHTML=`<b>Point ${selPt+1}</b> · ${t12(p.t)} · <b>${Math.round(p.pct)}%</b><br>Output at this point: ${chText(rawPct(anchorRaw(p).map(Math.round)))}`;}
 }
 
-/* point panel: readout, per-point colour, preview on the light */
+/* point panel: readout, per-point color, preview on the light */
 function selectPoint(i){selPt=i;renderCurve();}
 function renderPointBox(){
   const box=$("cpoint");
@@ -569,7 +569,7 @@ function renderPointBox(){
     <button onclick="backToLive()">Back to live curve</button><button onclick="selectPoint(null)">Close</button></div>`;
   if(pp()){
     if(!p.ch){p.preset=C.preset;p.ch=[...C.ch];}
-    const h=document.createElement("h3");h.textContent="Colour at this point";$("cpointColor").append(h);
+    const h=document.createElement("h3");h.textContent="Color at this point";$("cpointColor").append(h);
     const pick=document.createElement("div");$("cpointColor").append(pick);
     colorPicker(pick,p,()=>{cMarkDirty();renderPointsTable();});
   }
@@ -582,13 +582,13 @@ function previewPoint(){
 }
 function backToLive(){run("Back to live",()=>api("/api/normal",{targets:targets()}));}
 
-/* table, mode, colours, profiles */
+/* table, mode, colors, profiles */
 function renderPointsTable(){
   const tb=$("cpts");tb.innerHTML="";
   C.points.forEach((p,i)=>{
     const tr=document.createElement("tr");if(i===selPt)tr.className="selpt";
     tr.innerHTML=`<td><input type="time" step="300" value="${p.t}"></td><td><input type="number" min="0" max="100" value="${Math.round(p.pct)}"></td>`+
-      `<td class="ppcol" style="text-align:center"><span class="sw1" title="Edit this point's colour" style="background:${pointRGB(p)}"></span></td>`+
+      `<td class="ppcol" style="text-align:center"><span class="sw1" title="Edit this point's color" style="background:${pointRGB(p)}"></span></td>`+
       `<td><button class="danger" style="min-height:34px;padding:4px 10px">×</button></td>`;
     const [ti,pi]=tr.querySelectorAll("input");
     ti.onchange=()=>{if(ti.value){const keep=C.points[i];p.t=ti.value;C.points.sort((a,b)=>toMin(a.t)-toMin(b.t));if(selPt!=null)selPt=C.points.indexOf(keep);cMarkDirty();renderCurve();}};
@@ -602,7 +602,7 @@ function renderPointsTable(){
 }
 function renderMode(){
   const b=$("cmode");b.innerHTML="";
-  [["single","Single colour"],["per_point","Per-point colour (day sim)"]].forEach(([m,l])=>{
+  [["single","Single color"],["per_point","Per-point color (day sim)"]].forEach(([m,l])=>{
     const x=document.createElement("button");x.textContent=l;if((C.mode||"single")===m)x.className="sel";
     x.onclick=()=>{if(C.mode===m)return;C.mode=m;
       if(m==="per_point")C.points.forEach(p=>{if(!p.ch){p.preset=C.preset;p.ch=[...C.ch];}});
@@ -646,7 +646,7 @@ function addPoint(){
   let best=0;for(let i=1;i<C.points.length-1;i++)if(gap(i)>gap(best))best=i;
   const a=toMin(C.points[best].t),b=toMin(C.points[best+1].t),m=Math.round((a+b)/2/5)*5;
   if(m<=a||m>=b){toast("No room between points — change a time first",true);return;}
-  const prev=C.points[best]; // new points inherit the previous point's colour
+  const prev=C.points[best]; // new points inherit the previous point's color
   C.points.splice(best+1,0,{t:fmt(m),pct:Math.round(curveAt(m)),preset:prev.preset||null,ch:prev.ch?[...prev.ch]:null});
   selPt=best+1;cMarkDirty();renderCurve();
 }
@@ -748,13 +748,13 @@ function lightStatus(l){
     return {big:o.on?`Temporary • On${o.preset?" — "+o.preset:""}`:"Temporary • Off",sub:`Back to ${MODE_NAME[l.mode]} in ${m} min`,bulb:o.on?"ov":""};}
   if(l.mode==="advanced")return {big:"Advanced Mode",sub:"Running its 8-step schedule on the light",bulb:"on"};
   if(l.mode==="curve"){const p=l.curve.points,first=p[0].t,last=p[p.length-1].t,peak=Math.round(l.curve_peak);
-    const col=l.curve.mode==="per_point"?"day-sim colours":(l.curve.preset||"custom colour");
+    const col=l.curve.mode==="per_point"?"day-sim colors":(l.curve.preset||"custom color");
     const n=new Date(),nm=n.getHours()*60+n.getMinutes(),c=l.curve_now_ch.map(Math.round);
     if(nm>=toMin(first)&&nm<=toMin(last))return {big:`Smooth Curve • now ${Math.round(l.curve_now)}% • Peak ${peak}% • Off ${t12(last)}`,
       sub:`R ${c[0]}% • G ${c[1]}% • B ${c[2]}% • UV ${c[3]}%`,bulb:l.curve_now>0?"on":""};
     return {big:`Smooth Curve • off now • Peak ${peak}%`,sub:`Starts ${t12(first)} • ${col}`,bulb:""};}
   const n=new Date(),nm=n.getHours()*60+n.getMinutes(),on=toMin(t.start),off=t.end==="24:00"?1440:toMin(t.end);
-  const inWin=on<off?(nm>=on&&nm<off):(nm>=on||nm<off),col=t.preset||"Custom colour";
+  const inWin=on<off?(nm>=on&&nm<off):(nm>=on||nm<off),col=t.preset||"Custom color";
   return inWin?{big:`Daily Timer • ${col} • Off ${t12(t.end)}`,sub:"On now",bulb:"on"}:{big:`Daily Timer • ${col} • On ${t12(t.start)}`,sub:"Off now",bulb:""};
 }
 function renderLights(){

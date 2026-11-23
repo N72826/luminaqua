@@ -27,7 +27,7 @@ def _hm(t: str) -> tuple[int, int]:
 
 
 # Power budget. The official app weights each channel by how much power its LEDs draw and won't let
-# a custom colour's weighted total go over 100 %. LuminAqua lets you set any mix and, when it's over,
+# a custom color's weighted total go over 100 %. LuminAqua lets you set any mix and, when it's over,
 # dims all channels evenly so what's sent fits. Factory presets (77-102 %) are sent byte-exact.
 POWER_WEIGHTS = (0.39, 0.41, 0.53, 0.11)   # R, G, B, UV
 MAX_POWER = 100.0
@@ -40,7 +40,7 @@ def power_pct(ch) -> float:
 
 
 def cap_pct(ch, limit: float = POWER_LIMIT) -> list[float]:
-    """Scale all channels down by the same factor so the mix fits the power budget (colour kept)."""
+    """Scale all channels down by the same factor so the mix fits the power budget (color kept)."""
     ch = [max(0.0, min(100.0, float(c))) for c in ch]
     p = power_pct(ch)
     if p <= limit:
@@ -112,7 +112,7 @@ def color_cmd(ch: list[float], preset: str | None = None) -> bytes:
 
 
 def daily_timer(timer: dict) -> list[bytes]:
-    """The official app's 'Mode setting': manual mode + colour + daily on-window."""
+    """The official app's 'Mode setting': manual mode + color + daily on-window."""
     return [*time_sync(), mode_manual(), color_cmd(timer["ch"], timer.get("preset")),
             manual_window(timer["start"], timer["end"], timer.get("ramp", 0))]
 
@@ -188,19 +188,19 @@ def curve_pct(points: list[dict], minute: float) -> float:
 
 
 def color_raw(preset: str | None, ch: list[float]) -> tuple[int, int, int, int]:
-    """A colour as raw levels: factory presets byte-exact, anything else (custom/saved) from %."""
+    """A color as raw levels: factory presets byte-exact, anything else (custom/saved) from %."""
     return APP_PRESETS[preset] if preset in APP_PRESETS else tuple(level(x) for x in ch)
 
 
 def point_color(curve: dict, p: dict) -> tuple[int, int, int, int]:
-    """Per-point colour mode uses the point's own colour (if it has one), otherwise the curve's."""
+    """Per-point color mode uses the point's own color (if it has one), otherwise the curve's."""
     if curve.get("mode") == "per_point" and p.get("ch") is not None:
         return color_raw(p.get("preset"), p["ch"])
     return color_raw(curve.get("preset"), curve["ch"])
 
 
 def anchor_raw(curve: dict, p: dict) -> list[float]:
-    """Effective output at an anchor point: colour channel x point brightness / 100 (unrounded)."""
+    """Effective output at an anchor point: color channel x point brightness / 100 (unrounded)."""
     k = float(p["pct"]) / 100
     return [v * k for v in point_color(curve, p)]
 

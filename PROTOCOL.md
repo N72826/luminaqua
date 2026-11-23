@@ -21,7 +21,7 @@ send the manual window (`FE F9 00 00 24 00 00 00`) with manual levels, and space
 
 ## The two modes (important)
 The light runs one of two modes, chosen by the last `FD F1` / `FD F2` it received:
-- **Manual / "Mode setting"** (`FD F1`) — the app's main screen. One colour (`FB F9 …`) shown only
+- **Manual / "Mode setting"** (`FD F1`) — the app's main screen. One color (`FB F9 …`) shown only
   inside a daily on-window (`FE F9 on-hh on-mm off-hh off-mm 00 ramp`), with a sunrise/sunset fade.
   Ramp index 0–5 = 0, 0.5, 1, 1.5, 2, 2.5 h.
 - **Advanced setting** (`FD F2`) — up to 8 periods (`FE Fn` / `FB Fn`).
@@ -61,8 +61,9 @@ take the total over **100 %** (it shows a "maximum" message instead):
 
 `power % = 0.39·R% + 0.41·G% + 0.53·B% + 0.11·UV%`  (all four at 100 % would be 144 %)
 
-The built-in presets sit at 77–102 % on this scale. LuminAqua applies the same limit to custom colours
-(sliders stop at 100 %) and, as a backstop, scales anything it sends above 102 % down proportionally.
+The built-in presets sit at 77–102 % on this scale and are sent byte-exact. For custom colors LuminAqua
+lets the sliders move freely and shows a power meter; any color (including curve points) above 100 % is
+scaled down evenly across all four channels to fit before it's sent.
 
 ## Smooth curves (LuminAqua)
 The lights can't fade between arbitrary levels on their own. LuminAqua stays in manual mode, sets the

@@ -1,7 +1,7 @@
 """LuminAqua - local web controller for Week Aqua lights.
 
 Model (matches the official app):
-  * Daily timer  = the app's "Mode setting": manual mode + a colour + an on/off window + sunrise ramp.
+  * Daily timer  = the app's "Mode setting": manual mode + a color + an on/off window + sunrise ramp.
                    The light runs it on its own. This is the normal mode.
   * Smooth curve = LuminAqua only: anchor points through the day; LuminAqua sends the interpolated
                    level every minute. The light's own window = the curve's span, so it still
@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 # Defaults for a newly added light: green, 11 AM - 6 PM, no fade.
 DEFAULT_TIMER = {"start": "11:00", "end": "18:00", "ramp": 0, "preset": "Green",
                  "ch": P.raw_to_pct(P.APP_PRESETS["Green"])}
-# A starting smooth curve (sunrise, midday peak, sunset) in the user's usual colour.
+# A starting smooth curve (sunrise, midday peak, sunset) in the user's usual color.
 DEFAULT_CURVE = {"mode": "single", "preset": "Green", "ch": P.raw_to_pct(P.APP_PRESETS["Green"]), "points": [
     {"t": "11:00", "pct": 0}, {"t": "12:30", "pct": 35}, {"t": "14:00", "pct": 65},
     {"t": "17:00", "pct": 65}, {"t": "18:30", "pct": 25}, {"t": "19:30", "pct": 0}]}
@@ -50,7 +50,7 @@ def _pt(t, pct, ch):
     return {"t": t, "pct": pct, "preset": None, "ch": list(ch)}
 
 
-# Built-in starters (per-point colour): warm, UV-free sunrise/sunset into a low-UV daylight peak.
+# Built-in starters (per-point color): warm, UV-free sunrise/sunset into a low-UV daylight peak.
 WARM = [75, 45, 18, 0]
 DAYLIGHT = [65, 79, 74, 26]     # 99.8% of the power budget; x 65% peak -> UV ~17% effective
 CRISP = [54, 71, 86, 34]        # 99.5% of the power budget; x 50% peak -> UV ~17% effective
@@ -61,7 +61,7 @@ CURVE_TEMPLATES = {
     "Algae Recovery ~50% Peak": {"mode": "per_point", "preset": None, "ch": CRISP, "points": [
         _pt("12:00", 0, WARM), _pt("13:00", 20, WARM), _pt("14:00", 50, CRISP),
         _pt("17:00", 50, CRISP), _pt("18:00", 20, WARM), _pt("18:30", 0, WARM)]},
-    "Simple Green (single colour)": DEFAULT_CURVE,
+    "Simple Green (single color)": DEFAULT_CURVE,
 }
 CURVE_STEP = 60       # seconds between live updates while the curve is changing
 CURVE_IDLE = 150      # stay connected this long between curve updates (reconnecting is slow)
@@ -439,7 +439,7 @@ def _factory_or_none(v):
 class Point(BaseModel):
     t: str
     pct: float = Field(..., ge=0, le=100)
-    # Per-point colour (used in "per_point" mode). Factory preset name, or None for custom/saved %.
+    # Per-point color (used in "per_point" mode). Factory preset name, or None for custom/saved %.
     preset: Optional[str] = None
     ch: Optional[List[float]] = Field(None, min_items=4, max_items=4)
     _t = validator("t", allow_reuse=True)(_check_time)
